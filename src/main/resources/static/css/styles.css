@@ -1112,47 +1112,69 @@ a:hover {
 
 @media (max-width: 768px) { /* Adjust for mobile phones */
     body {
-        /* On mobile, body should typically be display: block or manage its children specifically.
-           For this layout, we'll let main-content take full width and flow below the fixed mobile-header. */
-        display: block; /* Change body to block to stack mobile-header and main-content */
-        overflow-x: hidden; /* Prevent horizontal scroll due to off-canvas sidebar */
+        display: block;
+        overflow-x: hidden;
     }
 
-    /* Show mobile header on small screens */
     .mobile-header {
         display: flex;
     }
 
-    /* Hide desktop sidebar and make it a hidden off-canvas menu */
     .sidebar {
-        position: fixed; /* Fixed position for off-canvas */
+        position: fixed;
         top: 0;
-        left: -250px; /* Start off-screen to the left */
+        left: -250px;
         height: 100vh;
-        width: 250px; /* Fixed width for the mobile sidebar */
+        width: 250px;
         padding: 20px 0;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-        z-index: 1100; /* Ensure it's above the overlay and main content */
-        transition: left 0.3s ease; /* Smooth slide in/out */
+        z-index: 1100;
+        transition: left 0.3s ease;
+        /* Add flex properties for vertical stacking and scrollability */
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box; /* Crucial for padding/height interaction */
+        overflow-y: auto; /* IMPORTANT: Allow scrolling within the sidebar */
     }
 
-    /* Class added by JS to open the sidebar */
     .sidebar.open {
-        left: 0; /* Slide into view */
+        left: 0;
     }
 
-    /* Hide the desktop sidebar toggle button (from your fragment) */
     .sidebar-toggle {
         display: none;
     }
 
-    /* Hide elements specific to desktop sidebar layout on mobile */
     .sidebar-header {
-        display: none; /* Hide the full sidebar header on mobile */
+        /* You might want to display this on mobile too, or keep it hidden as per your design. */
+        /* If you keep it hidden, ensure enough padding/margin for menu items at the top. */
+        display: none; /* Keep hidden as per your current rule */
     }
+
+    /* REMOVE OR COMMENT THIS OUT: */
+    /* .sidebar-footer {
+        display: none;
+    } */
+
+    /* Ensure the menu takes up available space and pushes footer down */
+    .sidebar-menu {
+        flex-grow: 1; /* Allow menu to fill available space */
+        /* If menu items themselves can get very long, you might add: */
+        /* overflow-y: auto; */
+        /* padding-bottom: 20px; */ /* Add some space above the footer */
+    }
+
+    /* If you want the user info/logout to always be at the very bottom,
+       you already have `margin-top: auto;` on `.sidebar-footer`
+       in the general styles, which works great with `flex-direction: column`
+       on the parent `.sidebar`. */
     .sidebar-footer {
-        display: none; /* Hide footer on small screens */
+        /* Ensure it's not shrunk and has proper padding */
+        flex-shrink: 0;
+        padding-top: 15px; /* Add some padding above the border-top */
+        padding-bottom: 20px; /* Ensure space at the bottom of the sidebar itself */
     }
+
 
     /* Show the overlay when sidebar is open */
     .sidebar-overlay.active {

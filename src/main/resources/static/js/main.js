@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveItemBtn = document.getElementById('saveItemBtn');
 
     // Image preview elements
-    const itemImageFile = document.getElementById('itemImageFile');
-    const imagePreview = document.getElementById('imagePreview');
+    const itemImageFileInput = document.getElementById('itemImageFile');
+    const imagePreviewContainer = document.getElementById('imagePreview');
     const previewImage = document.getElementById('previewImage');
     const previewFileName = document.getElementById('previewFileName');
     const removeImageBtn = document.getElementById('removeImageBtn');
@@ -156,27 +156,41 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Image file input change listener
-    if (itemImageFile) {
-        itemImageFile.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    previewFileName.textContent = file.name;
-                    imagePreview.style.display = 'flex';
-                    // Store the base64 string in the hidden input for submission
-                    itemBase64Image.value = e.target.result.split(',')[1];
-                };
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.style.display = 'none';
-                previewImage.src = '';
-                previewFileName.textContent = '';
-                itemBase64Image.value = ''; // Clear hidden base64 input
-            }
-        });
-    }
+     if (itemImageFileInput) {
+                itemImageFileInput.addEventListener('change', function() {
+                    const file = this.files[0]; // Get the first selected file
+
+                    if (file) {
+                        // Define your maximum allowed file size in bytes (e.g., 15MB)
+                        // This should match or be slightly less than your server's spring.servlet.multipart.max-file-size
+                        const maxAllowedSizeInBytes = 15 * 1024 * 1024; // 15 MB
+
+                        if (file.size > maxAllowedSizeInBytes) {
+                            // File is too large, show an alert to the user
+                            alert('Файлът е твърде голям! Моля, изберете изображение по-малко от 15MB.');
+                            this.value = ''; // Clear the input field (important!)
+                            imagePreviewContainer.style.display = 'none'; // Hide any previous preview
+                            previewImage.src = '';
+                            previewFileName.textContent = '';
+                        } else {
+                            // File size is acceptable, proceed with displaying the preview
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                previewImage.src = e.target.result;
+                                previewFileName.textContent = file.name;
+                                imagePreviewContainer.style.display = 'flex'; // Show the preview container
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    } else {
+                        // No file selected, hide the preview
+                        imagePreviewContainer.style.display = 'none';
+                        previewImage.src = '';
+                        previewFileName.textContent = '';
+                    }
+                });
+     }
+
 
     // Remove image button listener
     if (removeImageBtn) {
