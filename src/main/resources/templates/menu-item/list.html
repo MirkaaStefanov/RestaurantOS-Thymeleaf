@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление на менюто</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Управление на менюто</h1>
+        <button class="btn-add-item" id="addNewItemBtn">
+            <i class="fas fa-plus"></i> Добави ново ястие
+        </button>
+    </div>
+
+    <div th:if="${successMessage}" class="form-alert alert-success">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" class="form-alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <div class="category-filter-buttons">
+        <button type="button" class="category-btn active" data-category="ALL">Всички</button>
+
+        <th:block th:each="cat : ${menuCategoryEnumValues}">
+            <button type="button" class="category-btn" th:data-category="${cat.name()}" th:text="${cat.name}">Category</button>
+        </th:block>
+
+        <label class="category-btn ml-auto d-flex align-items-center" style="cursor: pointer;">
+            <input type="checkbox" id="availableToggle" class="form-check-input" data-filter-type="availability">
+            <span class="ml-2">Само налични</span>
+        </label>
+    </div>
+
+
+    <div class="menu-item-grid" id="menuItemGrid">
+        <th:block th:if="${#lists.isEmpty(allMenuItems)}">
+            <p id="noMenuItemsMessage" style="text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
+                Няма намерени елементи от менюто за показване.
+            </p>
+        </th:block>
+        <th:block th:unless="${#lists.isEmpty(allMenuItems)}">
+            <div class="menu-item-card" th:each="item : ${allMenuItems}" th:data-id="${item.id}"
+                 th:data-category="${item.category != null ? item.category.name() : 'N/A'}"
+                 th:data-available="${item.available ? 'true' : 'false'}">
+                <img th:if="${item.image != null}"
+                     th:src="'data:image/jpeg;base64,' + ${item.image}"
+                     alt="Property Image" class="product-image">
+                <img th:if="${item.image == null}"
+                     th:src="@{/img/photos/noImage.png}" alt="Default Property Image" class="product-image">
+
+                <div class="menu-item-content">
+                    <div class="name-availability-row">
+                        <h3 class="menu-item-name" th:text="${item.name}">Име на ястието</h3>
+                        <span class="menu-item-availability"
+                              th:classappend="${item.available ? 'available-status' : 'not-available-status'}"
+                              th:text="${item.available ? 'Налично' : 'Неналично'}">Наличност</span>
+                    </div>
+
+                    <span class="menu-item-category" th:text="${item.category != null ? item.category.name : 'N/A'}">Категория</span>
+                    <p class="menu-item-description" th:text="${item.description ?: 'Няма описание.'}">Описание на ястието</p>
+
+                    <div class="menu-item-details">
+                        <span class="menu-item-price" th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">Цена</span>
+                        <span class="menu-item-prep-time">
+                            <i class="far fa-clock"></i> <span th:text="${item.preparationTime ?: 'N/A'}"></span> мин
+                        </span>
+                    </div>
+
+                    <div class="menu-item-actions">
+                        <form th:action="@{/menu-item/toggle/{id}(id=${item.id})}" method="post">
+                            <button type="submit" class="btn btn-toggle-availability">
+                                <span th:text="${item.available ? 'Скрий' : 'Покажи'}"></span>
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-edit" th:data-id="${item.id}">Редактирай</button>
+                        <form th:action="@{/menu-item/delete/{id}(id=${item.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете този елемент от менюто?');">
+                            <button type="submit" class="btn btn-delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<div class="modal-overlay" id="menuItemModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Добавяне на ново ястие</h2>
+            <button class="modal-close-btn" id="closeModalBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="menuItemForm" method="post" enctype="multipart/form-data" th:action="@{/menu-item}">
+                <input type="hidden" id="menuItemId" name="id"> <div class="form-group">
+                <label for="itemName" class="form-label">Име*</label>
+                <input type="text" id="itemName" name="name" class="form-control" placeholder="напр., Вкусно суфле"
+                       required>
+            </div>
+
+                <div class="form-group">
+                    <label for="itemDescription" class="form-label">Описание</label>
+                    <textarea id="itemDescription" name="description" class="form-control" rows="3"
+                              placeholder="Богат, пухкав десерт."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="itemPrice" class="form-label">Цена*</label>
+                            <input type="number" id="itemPrice" name="price" class="form-control" step="0.01" min="0"
+                                   required placeholder="0.00">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="itemPrepTime" class="form-label">Време за приготвяне (мин)</label>
+                            <input type="number" id="itemPrepTime" name="preparationTime" class="form-control" min="0"
+                                   placeholder="15">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemCategory" class="form-label">Категория*</label>
+                    <select id="itemCategory" name="category" class="form-control" required>
+                        <option value="">Изберете категория</option>
+                        <option th:each="cat : ${menuCategoryEnumValues}"
+                                th:value="${cat.name()}"
+                                th:text="${cat.name}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemImageFile" class="form-label">Качване на изображение</label>
+                    <input type="file" id="itemImageFile" name="imageFile" accept="image/*" class="form-control">
+                    <div id="imagePreview" class="image-upload-preview mt-2" style="display: none;">
+                        <img id="previewImage" src="" alt="Image Preview">
+                        <span id="previewFileName"></span>
+                        <button type="button" id="removeImageBtn"><i class="fas fa-times"></i></button>
+                    </div>
+                    <input type="hidden" id="itemBase64Image" name="image">
+                </div>
+
+                <div class="form-group form-check">
+                    <input type="checkbox" id="itemAvailable" name="available" class="form-check-input">
+                    <label for="itemAvailable" class="form-check-label">Налично</label>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelModalBtn">Отказ</button>
+                    <button type="submit" class="btn-primary-action" id="saveItemBtn">Създай ястие</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/js/main.js}"></script>
+<script th:inline="javascript">
+    /* This script block contains data passed from the backend to the frontend */
+
+    // Convert Thymeleaf list to a JavaScript array for client-side filtering
+    const allMenuItems = [[${allMenuItems}]];
+
+    // Log for debugging
+    console.log("All Menu Items from backend:", allMenuItems);
+
+    // Get the menu category enum values
+    const menuCategoryEnumValues = [[${menuCategoryEnumValues.![name()]}]]
+</script>
+
+</body>
+</html>

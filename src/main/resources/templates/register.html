@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content">
+  <div class="form-page-wrapper">
+    <div class="form-page-container">
+      <h1 class="form-page-title">Регистрация</h1>
+
+      <form th:action="@{/auth/register}" method="post" th:object="${registerRequest}" class="styled-form" onsubmit="return validatePasswords();">
+        <div class="form-group">
+          <label for="email" class="form-label">Имейл</label>
+          <input type="email" id="email" class="form-control" th:field="*{email}" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Парола</label>
+          <input type="password" id="password" class="form-control" th:field="*{password}" required>
+        </div>
+
+        <div class="form-group">
+          <label for="repeatPassword" class="form-label">Повтори парола</label>
+          <input type="password" id="repeatPassword" class="form-control" required>
+        </div>
+        <div id="password-error-message" class="form-error-message"></div>
+
+
+        <div class="form-group">
+          <label for="name" class="form-label">Име</label>
+          <input type="text" id="name" class="form-control" th:field="*{name}" required>
+        </div>
+
+        <div class="form-group">
+          <label for="surName" class="form-label">Фамилия</label>
+          <input type="text" id="surName" class="form-control" th:field="*{surName}" required>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn-form-submit">Регистрация</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function validatePasswords() {
+   const password = document.getElementById("password").value;
+   const confirmPassword = document.getElementById("repeatPassword").value;
+   const errorMessage = document.getElementById("password-error-message");
+
+   if (password !== confirmPassword) {
+       errorMessage.textContent = "Паролите не съвпадат!";
+       errorMessage.style.display = 'block';
+       return false;
+   }
+   errorMessage.textContent = "";
+   errorMessage.style.display = 'none';
+   return true;
+}
+
+    // Sidebar Toggle Function (copy this into every page that uses the sidebar)
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('collapsed');
+
+        // Optional: for mobile responsiveness, if you have an overlay
+        // if (window.innerWidth <= 768) {
+        //     sidebar.classList.toggle('expanded'); // For mobile specific show/hide
+        // }
+    }
+</script>
+
+</body>
+</html>

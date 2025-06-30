@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${product.name} + ' - HM Properties'">Product Detail</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navigation-bar}"></div>
+
+<main class="detail-container">
+  <div class="detail-header">
+    <h1 class="detail-title" th:text="${product.name}">Luxury Apartment in City Center</h1>
+    <p class="detail-location">
+      <i class="fas fa-map-marker-alt"></i>
+      <span th:if="${product.city}" th:text="${product.city}">City</span>
+      <span th:if="${product.city != null && product.region != null && product.region.name != null}">, </span>
+      <span th:if="${product.region != null && product.region.name != null}" th:text="${product.region.name}">Region</span>
+    </p>
+  </div>
+
+  <div class="image-carousel-container">
+    <div class="carousel-main-image-wrapper">
+
+
+      <img id="main-product-image" th:if="${product.imageStrings != null && !product.imageStrings.isEmpty()}"
+           th:src="'data:image/jpeg;base64,' + ${product.imageStrings[0]}"
+           alt="Main Property Image" class="carousel-main-image">
+      <img th:if="${product.imageStrings == null || product.imageStrings.isEmpty()}"
+           th:src="@{/img/photos/noImage.png}" alt="Default Property Image" class="product-image">
+
+      <button class="carousel-nav prev" id="carousel-prev"><i class="fas fa-chevron-left"></i></button>
+      <button class="carousel-nav next" id="carousel-next"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div class="carousel-dots-container" th:if="${product.imageStrings != null && product.imageStrings.size() > 0}">
+      <span class="carousel-dot" th:each="imageString, iterStat : ${product.imageStrings}" th:data-index="${iterStat.index}"></span>
+    </div>
+    <div class="carousel-dots-container" th:if="${product.imageStrings == null || product.imageStrings.isEmpty()}">
+      <span class="carousel-dot active" data-index="0"></span>
+    </div>
+  </div>
+
+  <div class="thumbnail-gallery" th:if="${product.imageStrings != null && product.imageStrings.size() > 0}">
+    <div class="thumbnail-item" th:each="imageString, iterStat : ${product.imageStrings}" th:data-index="${iterStat.index}">
+      <img th:src="'data:image/jpeg;base64,' + ${imageString}" alt="Thumbnail Image" class="thumbnail-image">
+    </div>
+  </div>
+  <div class="thumbnail-gallery" th:if="${product.imageStrings == null || product.imageStrings.isEmpty()}">
+    <div class="thumbnail-item active" data-index="0">
+      <img th:src="@{/img/photos/noImage.png}" alt="No Image Thumbnail" class="thumbnail-image">
+    </div>
+  </div>
+
+
+  <div class="detail-content">
+    <p class="detail-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' Лв.'">99,000,000 Лв.</p>
+
+    <div class="detail-features">
+      <span class="detail-feature-item" th:if="${product.area > 0}">
+        <i class="fas fa-ruler-combined"></i>
+        <span th:text="${product.area} + ' кв.м'">120 sq.m</span>
+      </span>
+      <span class="detail-feature-item" th:if="${product.rooms > 0}">
+        <i class="fas fa-bed"></i>
+        <span th:text="${product.rooms} + (${product.rooms == 1 ? ' стая' : ' стаи'})">3 rooms</span>
+      </span>
+      <span class="detail-feature-item" th:if="${product.state != null}">
+        <i class="fas fa-tag"></i>
+        <span th:text="${product.state.name()}">State</span>
+      </span>
+    </div>
+
+    <div class="detail-description">
+      <h2>Описание</h2>
+      <p th:text="${product.description} ?: 'Няма налично описание за този имот.'">
+        This is a detailed description of the property, highlighting its features, layout, neighborhood, and any other relevant information. It should provide a comprehensive overview for potential buyers or renters.
+      </p>
+    </div>
+
+    <div class="back-button-container">
+      <a th:href="@{/product/all}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Назад към всички имоти
+      </a>
+    </div>
+  </div>
+</main>
+
+<div id="image-lightbox" class="image-lightbox-overlay">
+  <span class="lightbox-close-btn">&times;</span>
+  <img id="lightbox-image" src="" alt="Enlarged Property Image" class="lightbox-content">
+  <button class="lightbox-nav prev" id="lightbox-prev"><i class="fas fa-chevron-left"></i></button>
+  <button class="lightbox-nav next" id="lightbox-next"><i class="fas fa-chevron-right"></i></button>
+</div>
+
+<footer>
+</footer>
+
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+      // Get image strings from Thymeleaf. Handle null or empty list.
+      const imageStrings = /*[[${product.imageStrings}]]*/ [];
+      const defaultNoImage = /*[[@{/img/photos/noImage.png}]]*/ '/img/photos/noImage.png';
+
+      const mainImage = document.getElementById('main-product-image');
+      const prevButton = document.getElementById('carousel-prev');
+      const nextButton = document.getElementById('carousel-next');
+      const dotsContainer = document.querySelector('.carousel-dots-container');
+      const thumbnailGallery = document.querySelector('.thumbnail-gallery'); // New: Thumbnail container
+      let currentImageIndex = 0;
+
+      // Lightbox elements
+      const lightbox = document.getElementById('image-lightbox');
+      const lightboxImage = document.getElementById('lightbox-image');
+      const lightboxCloseBtn = document.querySelector('.lightbox-close-btn');
+      const lightboxPrevBtn = document.getElementById('lightbox-prev');
+      const lightboxNextBtn = document.getElementById('lightbox-next');
+
+      // Function to update the main carousel image and active dot/thumbnail
+      function updateCarousel(index) {
+          if (imageStrings && imageStrings.length > 0) {
+              currentImageIndex = (index + imageStrings.length) % imageStrings.length; // Loop through images
+              mainImage.src = 'data:image/jpeg;base64,' + imageStrings[currentImageIndex];
+              updateActiveStates(); // Update both dots and thumbnails
+          } else {
+              mainImage.src = defaultNoImage;
+              // Hide navigation if no actual images
+              if (prevButton) prevButton.style.display = 'none';
+              if (nextButton) nextButton.style.display = 'none';
+              if (dotsContainer) dotsContainer.innerHTML = '<span class="carousel-dot active" data-index="0"></span>'; // Display single dot for no image
+              if (thumbnailGallery) { // Handle no actual images for thumbnails
+                  thumbnailGallery.innerHTML = '<div class="thumbnail-item active" data-index="0"><img src="' + defaultNoImage + '" alt="No Image Thumbnail" class="thumbnail-image"></div>';
+              }
+          }
+      }
+
+      // Function to update the active dot AND active thumbnail
+      function updateActiveStates() {
+          if (dotsContainer) {
+              const dots = dotsContainer.querySelectorAll('.carousel-dot');
+              dots.forEach((dot, index) => {
+                  if (index === currentImageIndex) {
+                      dot.classList.add('active');
+                  } else {
+                      dot.classList.remove('active');
+                  }
+              });
+          }
+          if (thumbnailGallery) {
+              const thumbnails = thumbnailGallery.querySelectorAll('.thumbnail-item');
+              thumbnails.forEach((thumbnail, index) => {
+                  if (index === currentImageIndex) {
+                      thumbnail.classList.add('active');
+                  } else {
+                      thumbnail.classList.remove('active');
+                  }
+              });
+          }
+      }
+
+      // Initialize carousel on page load
+      updateCarousel(0); // This will set the initial active states
+
+      // Carousel navigation events
+      if (prevButton) {
+          prevButton.addEventListener('click', () => updateCarousel(currentImageIndex - 1));
+      }
+
+      if (nextButton) {
+          nextButton.addEventListener('click', () => updateCarousel(currentImageIndex + 1));
+      }
+
+      // Dots navigation events
+      if (dotsContainer) {
+          dotsContainer.addEventListener('click', (event) => {
+              if (event.target.classList.contains('carousel-dot')) {
+                  const index = parseInt(event.target.dataset.index);
+                  updateCarousel(index);
+              }
+          });
+      }
+
+      // New: Thumbnail clicks to update main carousel
+      if (thumbnailGallery) {
+          thumbnailGallery.addEventListener('click', (event) => {
+              // Find the closest parent with class 'thumbnail-item'
+              const thumbnailItem = event.target.closest('.thumbnail-item');
+              if (thumbnailItem) {
+                  const index = parseInt(thumbnailItem.dataset.index);
+                  updateCarousel(index); // Update main carousel and active states
+              }
+          });
+      }
+
+
+      // Lightbox functionality
+      mainImage.addEventListener('click', () => {
+          if (imageStrings && imageStrings.length > 0) {
+              lightbox.style.display = 'flex'; // Use flex to center content
+              updateLightboxImage(currentImageIndex);
+          }
+          // If no images, clicking main image does nothing or shows a message
+      });
+
+      lightboxCloseBtn.addEventListener('click', () => {
+          lightbox.style.display = 'none';
+      });
+
+      // Close lightbox if clicking outside the image content
+      lightbox.addEventListener('click', (event) => {
+          if (event.target === lightbox) {
+              lightbox.style.display = 'none';
+          }
+      });
+
+      lightboxPrevBtn.addEventListener('click', () => {
+          updateLightboxImage(currentImageIndex - 1);
+      });
+
+      lightboxNextBtn.addEventListener('click', () => {
+          updateLightboxImage(currentImageIndex + 1);
+      });
+
+      // Function to update the image in the lightbox
+      function updateLightboxImage(index) {
+          if (imageStrings && imageStrings.length > 0) {
+              currentImageIndex = (index + imageStrings.length) % imageStrings.length; // Loop through images
+              lightboxImage.src = 'data:image/jpeg;base64,' + imageStrings[currentImageIndex];
+          } else {
+              lightboxImage.src = defaultNoImage;
+          }
+      }
+
+      // Keyboard navigation for lightbox (optional)
+      document.addEventListener('keydown', (event) => {
+          if (lightbox.style.display === 'flex') { // Only active if lightbox is open
+              if (event.key === "ArrowLeft") {
+                  updateLightboxImage(currentImageIndex - 1);
+              } else if (event.key === "ArrowRight") {
+                  updateLightboxImage(currentImageIndex + 1);
+              } else if (event.key === "Escape") {
+                  lightbox.style.display = 'none';
+              }
+          }
+      });
+  });
+</script>
+
+</body>
+</html>

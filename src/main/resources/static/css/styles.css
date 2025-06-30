@@ -1,0 +1,1176 @@
+/* Basic Reset & Font Setup */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f0f2f5; /* Light gray background */
+    display: flex; /* Use flexbox for sidebar and main content layout */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* --- Sidebar Styling --- */
+.sidebar {
+    width: 250px;
+    background-color: #ffffff; /* White background for sidebar */
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease, transform 0.3s ease;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1000;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+/* Sidebar Header (Logo/Title) */
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.sidebar-header .nav-logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-header .nav-logo .logo-rp {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar.collapsed .sidebar-header .nav-logo .logo-hm {
+    margin-right: 0;
+}
+
+.logo-hm {
+    background-color: #ffc107; /* Yellow/orange accent */
+    color: #333;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1;
+}
+
+.sidebar-menu-item {
+    margin-bottom: 5px;
+}
+
+.sidebar-menu-item .sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #555;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 0 10px;
+    transition: background-color 0.3s ease, color 0.3s ease, padding 0.3s ease;
+}
+
+.sidebar-menu-item .sidebar-link:hover {
+    background-color: #f0f2f5;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.sidebar-menu-item .sidebar-link.active {
+    background-color: #e0f2f7;
+    color: #007bff;
+    font-weight: 600;
+}
+
+.sidebar-link i {
+    margin-right: 15px;
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+    transition: margin-right 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-link i {
+    margin-right: 0;
+}
+
+.sidebar-link span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-link span {
+    opacity: 0;
+    width: 0;
+    padding-left: 0;
+}
+
+/* User Profile/Logout Section at the bottom of the sidebar */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px 10px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #ccc;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    transition: width 0.3s ease, height 0.3s ease, margin-bottom 0.3s ease;
+}
+
+.sidebar.collapsed .user-avatar {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 0;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease;
+}
+
+.user-role {
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .user-role {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar-footer .logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f8f8;
+    color: #dc3545;
+    padding: 10px 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    width: calc(100% - 20px);
+    margin: 0 10px;
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.logout-btn i {
+    margin-right: 10px;
+    transition: margin-right 0.3s ease;
+}
+
+.sidebar.collapsed .logout-btn {
+    width: 50px;
+    padding: 10px;
+}
+
+.sidebar.collapsed .logout-btn i {
+    margin-right: 0;
+}
+
+.sidebar.collapsed .logout-btn span {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.logout-btn:hover {
+    background-color: #fcebeb;
+    color: #c82333;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    right: -15px;
+    background-color: #007bff;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 1001;
+}
+
+.sidebar-toggle:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.sidebar-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+}
+
+/* --- Main Content Area --- */
+.main-content {
+    flex-grow: 1; /* Takes remaining space */
+    padding: 30px;
+    background-color: #f0f2f5; /* Match body background */
+    margin: 0;
+    border-radius: 0;
+    /* Added for consistent centering of forms within main-content */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally within main-content */
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    width: 100%; /* Ensure header spans full width within main-content's padding */
+    max-width: 1200px; /* Limit header width on very large screens for better readability */
+}
+
+.page-header h1 {
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* Button to Add New Item */
+.btn-add-item {
+    background-color: #ffc107; /* Yellow/orange accent */
+    color: #333;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px; /* Rounded corners */
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add-item i {
+    font-size: 18px;
+}
+
+.btn-add-item:hover {
+    background-color: #e0a800; /* Darker yellow/orange on hover */
+    transform: translateY(-2px);
+}
+
+/* Flash Messages (alerts) */
+.form-alert {
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: left;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    width: 100%; /* Ensure alerts span full width within main-content's padding */
+    max-width: 1200px; /* Limit alerts width on very large screens */
+}
+
+.alert-success {
+    background-color: #e6ffed;
+    color: #28a745;
+    border: 1px solid #a3e6b2;
+}
+
+.alert-danger {
+    background-color: #ffe6e6;
+    color: #dc3545;
+    border: 1px solid #ffb3b3;
+}
+
+/* --- Category Filter Buttons --- */
+.category-filter-buttons {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap to next line */
+    gap: 10px; /* Space between buttons */
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    width: 100%; /* Ensure filters span full width within main-content's padding */
+    max-width: 1200px; /* Limit filters width on very large screens */
+}
+
+.category-btn {
+    background-color: #e9ecef;
+    color: #555;
+    padding: 8px 18px;
+    border: 1px solid #dee2e6;
+    border-radius: 20px; /* Pill shape for filter buttons */
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.category-btn.active {
+    background-color: #007bff; /* Primary blue for active filter */
+    color: #fff;
+    border-color: #007bff;
+}
+
+.category-btn:hover {
+    background-color: #dee2e6;
+    color: #333;
+}
+
+.category-btn.active:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Checkbox within filter button label */
+.category-btn input[type="checkbox"] {
+    margin-right: 5px; /* Space between checkbox and text */
+    transform: scale(1.1); /* Slightly larger checkbox */
+    accent-color: #007bff; /* Uses the active filter color */
+}
+
+.category-btn span.ml-2 { /* For the text next to the checkbox */
+    margin-left: 0.5rem;
+}
+
+/* --- Menu Item Grid (Main display for cards) --- */
+.menu-item-grid {
+    display: flex;
+    flex-wrap: wrap; /* Allows cards to wrap to the next line */
+    gap: 20px; /* Space between cards, adjusted to be slightly smaller */
+    justify-content: flex-start; /* <<< CHANGED: Align cards from left to right */
+    align-items: flex-start; /* Align cards to the start of the cross-axis (top) */
+    width: 100%; /* Ensure grid spans full width to allow aligning from left */
+    max-width: 1200px; /* Limit grid width for very large screens */
+}
+
+.menu-item-card {
+    background-color: #ffffff; /* White background for the card */
+    border-radius: 12px; /* Rounded corners for bubble design */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Slightly softer shadow */
+    overflow: hidden; /* Ensures image corners are rounded */
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* FIXED SIZE FOR CARDS */
+    width: 250px; /* Fixed width for cards - adjust this value for desired size */
+    height: 385px; /* Fixed height for cards - adjust this value for desired size */
+    flex-shrink: 0; /* Prevents cards from shrinking below their width */
+    flex-grow: 0; /* Prevents cards from growing to fill extra space */
+}
+.menu-item-card:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+}
+
+.name-availability-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically align items in this row */
+    margin-bottom: 4px; /* Space below this row */
+}
+
+/* Corrected image class name from .menu-item-image to .product-image */
+.product-image {
+    width: 100%;
+    height: 150px; /* Reduced image height to fit smaller card */
+    object-fit: cover; /* Covers the area, cropping if necessary */
+    display: block;
+    border-bottom: 1px solid #f0f2f5; /* Subtle separator below image */
+}
+
+.menu-item-content {
+    padding: 15px; /* Reduced padding slightly */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allows content to take available space and push actions to bottom */
+}
+
+.menu-item-category {
+    font-size: 12px; /* Slightly smaller font */
+    font-weight: 500;
+    color: #6c757d; /* Muted text color */
+    margin-bottom: 6px; /* Reduced margin */
+    background-color: #f0f2f5; /* Light background for category tag */
+    padding: 3px 7px; /* Reduced padding */
+    border-radius: 4px;
+    display: inline-block; /* To make background apply only to text width */
+    align-self: flex-start; /* Aligns tag to the left */
+}
+
+.menu-item-name {
+    font-size: 18px; /* Slightly smaller font */
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px; /* Reduced margin */
+    white-space: nowrap; /* Prevents name from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds "..." for overflowing text */
+}
+
+.menu-item-description {
+    font-size: 13px; /* Smaller description text */
+    color: #666;
+    line-height: 1.4;
+    height: 35px; /* FIXED HEIGHT FOR DESCRIPTION - REDUCED to fit 2 lines */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ensures ellipsis for overflowing text */
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Still limit to 2 lines visual, but fixed height ensures consistency */
+    -webkit-box-orient: vertical;
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.menu-item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto; /* Pushes price/prep time to the bottom */
+    padding-top: 10px; /* Add some space above details */
+    border-top: 1px solid #eee; /* Separator line */
+}
+
+.menu-item-price {
+    font-size: 20px; /* Slightly smaller font */
+    font-weight: 700;
+    color: #28a745; /* Green for price */
+}
+
+.menu-item-prep-time {
+    font-size: 14px; /* Slightly smaller font */
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 4px; /* Reduced gap */
+}
+
+.menu-item-prep-time i {
+    font-size: 15px; /* Slightly smaller icon */
+    color: #999;
+}
+
+.menu-item-availability {
+    font-size: 13px; /* Slightly smaller font */
+    font-weight: 500;
+    margin-top: 8px; /* Reduced margin */
+    padding: 3px 7px; /* Reduced padding */
+    border-radius: 4px;
+    display: inline-block; /* To make background apply only to text width */
+    align-self: flex-start; /* Aligns tag to the left */
+}
+
+.available-status {
+    color: #28a745;
+    background-color: #e6ffed;
+}
+
+.not-available-status {
+    color: #dc3545;
+    background-color: #ffe6e6;
+}
+
+.menu-item-actions {
+    margin-top: 15px; /* Reduced margin */
+    display: flex;
+    gap: 8px; /* Reduced gap */
+    justify-content: flex-end; /* Align buttons to the right */
+    border-top: 1px solid #f0f2f5; /* Subtle separator for actions */
+    padding-top: 10px; /* Reduced padding */
+}
+
+.btn {
+    padding: 7px 12px; /* Reduced padding for smaller buttons */
+    border-radius: 6px; /* Slightly rounded buttons */
+    font-size: 13px; /* Smaller font for buttons */
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: none;
+}
+
+.btn-toggle-availability {
+    background-color: #ffc107; /* Yellow/orange for toggle */
+    color: #333;
+}
+
+.btn-toggle-availability:hover {
+    background-color: #e0a800;
+    transform: translateY(-1px);
+}
+
+.btn-edit {
+    background-color: #007bff; /* Blue for edit */
+    color: #fff;
+}
+
+.btn-edit:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.btn-delete {
+    background-color: #dc3545; /* Red for delete */
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Ensure it's above everything */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 500px; /* Adjusted max-width for forms */
+    transform: translateY(-50px); /* Start slightly above center */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    display: flex;
+    flex-direction: column; /* Stack header, body, footer */
+    max-height: 90vh; /* Ensure modal itself doesn't overflow viewport */
+}
+
+.modal-overlay.active .modal-container {
+    transform: translateY(0); /* Slide into view */
+    opacity: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #777;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto; /* Enable scrolling for long forms */
+    flex-grow: 1; /* Allow body to expand */
+}
+
+/* Form Grouping within modal */
+.form-group {
+    margin-bottom: 20px; /* Space between form fields */
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-top: 15px; /* Spacing for checkbox */
+}
+
+.form-check-input {
+    margin-right: 10px;
+    transform: scale(1.1); /* Slightly larger checkbox */
+    accent-color: #007bff;
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+}
+
+.row {
+    display: flex;
+    gap: 20px;
+}
+
+.col-md-6 {
+    flex: 1; /* Take equal width */
+}
+
+.image-upload-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    position: relative;
+    overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+.image-upload-preview img {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 6px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.image-upload-preview span {
+    font-size: 14px;
+    color: #666;
+    flex-grow: 1; /* Allow file name to take space */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.image-upload-preview #removeImageBtn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 18px;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.image-upload-preview #removeImageBtn:hover {
+    background-color: #f8d7da;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 25px;
+    border-top: 1px solid #eee;
+    gap: 10px;
+}
+
+.btn-cancel {
+    background-color: #e9ecef;
+    color: #555;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+}
+
+.btn-primary-action {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary-action:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* --- LOGIN / REGISTER FORM STYLES --- */
+/* These styles target the login/register forms which are likely on their own pages */
+/* They need to be robustly centered and responsive */
+
+/* Make form-page-wrapper take full height to center content vertically and horizontally */
+.form-page-wrapper {
+    flex-grow: 1; /* Allow to take available space within main-content */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%; /* Ensure it takes full width of main-content to allow centering */
+    max-width: 1200px; /* Match max-width of other main-content children for consistent page layout */
+}
+
+.form-page-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%; /* Take full width of its parent (form-page-wrapper's flex item) */
+    max-width: 450px; /* Keep max-width for the form itself */
+    box-sizing: border-box;
+    text-align: center;
+    margin: 0 auto; /* Explicitly center horizontally within its allocated space */
+}
+
+.form-page-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* --- General Form Styling (used by login/register and also the modal form) --- */
+.styled-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between form groups */
+}
+
+.form-group {
+    text-align: left; /* Align labels and inputs to the left */
+    margin-bottom: 0; /* Let gap handle spacing, or specify if needed */
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd; /* Lighter border */
+    border-radius: 8px; /* Slightly more rounded inputs */
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.btn-form-submit {
+    background-color: #007bff; /* Bright blue */
+    color: #fff; /* White text */
+    padding: 12px 25px;
+    border: none; /* Ensure no border that could obscure it */
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%; /* Full width button */
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.btn-form-submit:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.form-link-group {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #777;
+    text-align: center;
+}
+
+.form-link {
+    color: #007bff;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.form-link:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.form-text-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.form-text-divider::before,
+.form-text-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #eee;
+}
+
+.form-text-divider:not(:empty)::before {
+    margin-right: .25em;
+}
+
+.form-text-divider:not(:empty)::after {
+    margin-left: .25em;
+}
+
+/* --- Google Button --- */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff; /* White background */
+    color: #4285f4; /* Google blue text */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.btn-google img {
+    margin-right: 10px;
+}
+
+.btn-google:hover {
+    background-color: #f8f8f8;
+    border-color: #cdd;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+}
+
+/* --- Register Link Group --- */
+.register-link-group {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-form-secondary {
+    background-color: #e9ecef;
+    color: #333;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 500;
+}
+
+.btn-form-secondary:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) { /* Adjust sidebar for tablets */
+    .sidebar {
+        width: 200px;
+        padding: 15px;
+    }
+    .sidebar-title {
+        font-size: 1.5em;
+    }
+    .sidebar-link {
+        font-size: 1em;
+        padding: 10px 12px;
+    }
+    .sidebar-link i {
+        font-size: 1.1em;
+    }
+    .main-content {
+        padding: 15px 20px;
+        margin: 15px;
+    }
+    .page-header h1 {
+        font-size: 1.8em;
+    }
+    .btn-add-item {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    .modal-container {
+        max-width: 450px;
+    }
+    /* Specific card adjustments for 992px breakpoint */
+    .menu-item-card {
+        width: 200px; /* Make cards slightly smaller than 250px */
+        height: 330px; /* Adjust height accordingly */
+    }
+    .product-image {
+        height: 110px; /* Adjust image height */
+    }
+    .menu-item-name {
+        font-size: 16px;
+    }
+    .menu-item-description {
+        height: 30px; /* Adjusted to be smaller */
+        font-size: 12px;
+    }
+    .menu-item-price {
+        font-size: 18px;
+    }
+    .menu-item-prep-time {
+        font-size: 13px;
+    }
+    .menu-item-category, .menu-item-availability {
+        font-size: 11px;
+        padding: 2px 5px;
+    }
+    .btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) { /* Adjust for mobile phones */
+    body {
+        flex-direction: column; /* Stack sidebar and main content vertically */
+    }
+    .sidebar {
+        position: static; /* No longer sticky */
+        width: 100%;
+        height: auto; /* Allow content to dictate height */
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 999; /* Ensure it's above main content on scroll */
+    }
+    .sidebar-header {
+        margin-bottom: 15px;
+    }
+    .sidebar-menu { /* Ensure horizontal scrolling for menu items */
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 10px;
+    }
+    .sidebar-menu-item {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 0;
+    }
+    .sidebar-menu-item:last-child {
+        margin-right: 0;
+    }
+    .sidebar-footer {
+        display: none; /* Hide footer on small screens */
+    }
+
+    .main-content {
+        margin: 10px;
+        padding: 15px;
+        align-items: center; /* Center items on small screens too */
+    }
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .page-header h1 {
+        width: 100%;
+        text-align: center;
+    }
+    .btn-add-item {
+        width: 100%;
+        justify-content: center;
+    }
+    .category-filter-buttons {
+        flex-direction: column; /* Stack filter buttons vertically */
+        align-items: stretch;
+        gap: 8px;
+    }
+    .category-btn {
+        width: 100%; /* Full width buttons */
+        text-align: center;
+    }
+    .category-btn.ml-auto { /* Adjust 'Само налични' checkbox button */
+        margin-left: 0 !important;
+    }
+    .col-md-6 {
+        flex: 0 0 100%; /* Stack columns on small screens */
+        max-width: 100%;
+    }
+    .modal-container {
+        width: 95%; /* Adjust for smaller screens */
+        max-width: none;
+    }
+    .modal-header {
+        padding: 15px 20px;
+    }
+    .modal-title {
+        font-size: 20px;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-footer {
+        padding: 15px 20px;
+    }
+    .menu-item-grid { /* For mobile, allow single column and auto height */
+        display: flex; /* Override to flex for better control on mobile cards */
+        flex-direction: column; /* Stack cards vertically */
+        align-items: center; /* Center single card horizontally */
+    }
+    .menu-item-card { /* Full width on mobile, and allow height to adjust based on content */
+        width: 90%; /* Max 90% width of the screen */
+        max-width: 300px; /* Optional: limit max width even if 100% on small screens */
+        height: auto; /* Allow height to adjust on mobile */
+        margin: 0 auto 20px auto; /* Center single card and add bottom margin */
+    }
+    .product-image {
+        height: 160px; /* Slightly taller image for full-width mobile cards */
+    }
+    .menu-item-description {
+        height: auto; /* Allow description to expand on mobile */
+        -webkit-line-clamp: unset; /* Remove line clamp for mobile for better readability */
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 10px;
+        margin: 5px;
+    }
+    .page-header h1 {
+        font-size: 1.5em;
+    }
+    .btn-add-item {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+}

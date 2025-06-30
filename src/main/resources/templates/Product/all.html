@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Properties</title>
+
+  <meta name="_csrf" th:content="${_csrf.token}" th:if="${_csrf}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" th:if="${_csrf}" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+
+<body>
+
+<div th:replace="~{fragments/header :: navigation-bar}"></div>
+
+<section class="filter-section">
+  <form id="filter-form" action="/product/filter" method="get">
+
+    <div class="filter-toggle-group state-toggle-group">
+      <button type="button" class="btn-filter-type btn-state" data-type="">All States</button>
+      <button type="button" class="btn-filter-type btn-state" th:each="state : ${T(com.example.HM_frontend.enums.State).values()}"
+              th:value="${state.name()}"
+              th:text="${state.name()}"
+              th:data-type="${state.name()}">State Name</button>
+    </div>
+
+    <div class="filter-container">
+      <div class="filter-group global-search-group">
+        <input type="text" id="global-search-input" name="globalSearchText" class="filter-input" placeholder="Име, описание, град...">
+      </div>
+
+      <div class="filter-group">
+        <select class="filter-select" id="rooms-filter" name="minRooms">
+          <option value="">Стаи</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+          <option value="5">5+</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-price-inputs">
+          <input type="number" id="min-price-input" name="minPrice" class="filter-input" placeholder="Мин. цена">
+          <input type="number" id="max-price-input" name="maxPrice" class="filter-input" placeholder="Макс. цена">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <input type="number" id="min-area-input" name="minArea" class="filter-input" placeholder="Мин. площ (кв.м.)">
+      </div>
+
+      <div class="filter-group">
+        <input type="text" id="city-filter" name="city" class="filter-input" placeholder="Град">
+      </div>
+
+      <div class="filter-group">
+        <select class="filter-select" id="region-filter" name="regionId">
+          <option value="">Регион</option>
+          <option th:each="region : ${regions}"
+                  th:value="${region.id}"
+                  th:text="${region.name}">Region Name</option>
+        </select>
+      </div>
+
+      <button type="submit" class="filter-button" id="apply-filter-btn">
+        <i class="fas fa-search"></i> Търси
+      </button>
+
+    </div>
+  </form>
+</section>
+
+<main class="product-grid-container">
+  <div class="product-grid" id="product-grid-container" th:if="${products != null && !products.isEmpty()}">
+    <a th:href="@{/product/{id}(id=${product.id})}" class="product-card-link" th:each="product : ${products}"
+       th:data-product-id="${product.id}"
+       th:data-product-state="${product.state != null ? product.state.name() : ''}"
+       th:data-product-city="${product.city}"
+       th:data-product-region-id="${product.region != null ? product.region.name : ''}"
+       th:data-product-area="${product.area}"
+       th:data-product-rooms="${product.rooms}"
+       th:data-product-price="${product.price}">
+      <div class="product-card" th:id="'product-card-' + ${product.id}">
+        <div class="product-image-container">
+          <img th:if="${product.imageStrings != null && !product.imageStrings.isEmpty()}"
+               th:src="'data:image/jpeg;base64,' + ${product.imageStrings[0]}"
+               alt="Property Image" class="product-image">
+          <img th:if="${product.imageStrings == null || product.imageStrings.isEmpty()}"
+               th:src="@{/img/photos/noImage.png}" alt="Default Property Image" class="product-image">
+
+          <button class="like-button" th:attr="onclick='toggleLike(this, event, \'' + ${product.id} + '\')'">
+            <i class="far fa-heart"></i>
+          </button>
+        </div>
+
+        <div class="product-info">
+          <h3 class="product-name" th:title="${product.name}" th:text="${product.name}">Property Name</h3>
+
+          <p class="product-location" th:if="${product.city != null || (product.region != null && product.region.name != null)}">
+            <i class="fas fa-map-marker-alt"></i>
+            <span th:if="${product.city}" th:text="${product.city}">City</span>
+            <span th:if="${product.city != null && product.region != null && product.region.name != null}">, </span>
+            <span th:if="${product.region != null && product.region.name != null}" th:text="${product.region.name}">Region</span>
+          </p>
+
+          <p class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' Лв.'">99,000 Лв.</p>
+
+          <div class="product-features">
+            <span class="feature-item" th:if="${product.area > 0}">
+              <i class="fas fa-ruler-combined"></i>
+              <span th:text="${product.area} + ' кв.м'">120 кв.м</span>
+            </span>
+            <span class="feature-item" th:if="${product.rooms > 0}">
+              <i class="fas fa-bed"></i>
+              <span th:text="${product.rooms} + (${product.rooms == 1 ? ' стая' : ' стаи'})">3 стаи</span>
+            </span>
+            <span class="feature-item" th:if="${product.state != null}">
+              <i class="fas fa-tag"></i>
+              <span th:text="${product.state.name()}">State</span>
+            </span>
+          </div>
+
+          <p class="product-description-snippet" th:if="${product.description != null && !product.description.trim().isEmpty()}" th:text="${product.description}">
+            A brief description of the property, highlighting its key features and appeal.
+          </p>
+          <p class="product-description-snippet" th:if="${product.description == null || product.description.trim().isEmpty()}">&nbsp;</p>
+
+        </div>
+      </div>
+    </a>
+  </div>
+  <div th:if="${products == null || products.isEmpty()}" id="no-products-message">
+    <p>Няма намерени имоти.</p>
+  </div>
+</main>
+
+<footer>
+</footer>
+
+<script th:inline="javascript">
+  // =================================================================================
+  // === UPDATED ASYNCHRONOUS LIKE FUNCTION ==========================================
+  // =================================================================================
+  async function toggleLike(button, event, productId) {
+      event.preventDefault(); // Stop the <a> link from navigating
+      event.stopPropagation(); // Stop the event from bubbling up
+
+      const icon = button.querySelector('i');
+
+      // --- CSRF Token Handling ---
+      const csrfToken = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+      const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+      const headers = {
+          'Content-Type': 'application/json'
+      };
+      if (csrfToken && csrfHeader) {
+          headers[csrfHeader] = csrfToken;
+      }
+      // ----------------------------
+
+      try {
+          // The fetch URL matches the endpoint in your *frontend* controller
+          const response = await fetch(`/product/like/${productId}`, {
+              method: 'POST',
+              headers: headers,
+          });
+
+          if (response.ok) {
+              // Success! Toggle the heart icon's classes
+              icon.classList.toggle('far'); // Toggle empty heart
+              icon.classList.toggle('fas'); // Toggle solid heart
+          } else if (response.status === 401) {
+              // Unauthorized - user is not logged in. Redirect to login page.
+              window.location.href = '/auth/login'; // Or your specific login page URL
+          } else {
+              // Handle other server errors
+              console.error('Failed to like the product. Status:', response.status);
+              alert('An error occurred. Please try again.');
+          }
+      } catch (error) {
+          console.error('A network error occurred:', error);
+          alert('A network error occurred. Please check your connection and try again.');
+      }
+  }
+
+
+  // =================================================================================
+  // === ALL ORIGINAL PAGE INITIALIZATION LOGIC (UNCHANGED) ==========================
+  // =================================================================================
+  document.addEventListener('DOMContentLoaded', () => {
+
+      // --- SECTION 1: Filter and Form Initialization Logic ---
+      const urlParams = new URLSearchParams(window.location.search);
+
+      const setInputValue = (id, paramName) => {
+          const input = document.getElementById(id);
+          if (input && urlParams.has(paramName)) {
+              input.value = urlParams.get(paramName);
+          }
+      };
+
+      setInputValue('global-search-input', 'globalSearchText');
+      setInputValue('rooms-filter', 'minRooms');
+      setInputValue('min-price-input', 'minPrice');
+      setInputValue('max-price-input', 'maxPrice');
+      setInputValue('min-area-input', 'minArea');
+      setInputValue('city-filter', 'city');
+      setInputValue('region-filter', 'regionId');
+
+      const purposeButtons = document.querySelectorAll('.filter-toggle-group:not(.state-toggle-group) .btn-filter-type');
+      const initialPurpose = urlParams.get('propertyPurpose') || 'buy';
+      purposeButtons.forEach(button => {
+          if (button.dataset.type === initialPurpose) {
+              button.classList.add('active');
+          }
+          button.addEventListener('click', () => {
+              purposeButtons.forEach(btn => btn.classList.remove('active'));
+              button.classList.add('active');
+              updateHiddenInput('propertyPurpose', button.dataset.type);
+          });
+      });
+
+      const stateButtons = document.querySelectorAll('.state-toggle-group .btn-filter-type');
+      const initialState = urlParams.get('state') || '';
+      stateButtons.forEach(button => {
+          if (button.dataset.type === initialState) {
+              button.classList.add('active');
+          }
+          button.addEventListener('click', () => {
+              stateButtons.forEach(btn => btn.classList.remove('active'));
+              button.classList.add('active');
+              updateHiddenInput('state', button.dataset.type);
+          });
+      });
+
+      function updateHiddenInput(name, value) {
+          let hiddenInput = document.getElementById('hidden-input-' + name);
+          if (!hiddenInput) {
+              hiddenInput = document.createElement('input');
+              hiddenInput.type = 'hidden';
+              hiddenInput.id = 'hidden-input-' + name;
+              hiddenInput.name = name;
+              document.getElementById('filter-form').appendChild(hiddenInput);
+          }
+          hiddenInput.value = value;
+      }
+
+      if (initialPurpose) updateHiddenInput('propertyPurpose', initialPurpose);
+      if (initialState) updateHiddenInput('state', initialState);
+
+
+      // --- SECTION 2: WebSocket Connection Logic ---
+      function connect() {
+          const socket = new SockJS('/ws');
+          const stompClient = Stomp.over(socket);
+          stompClient.debug = null;
+
+          stompClient.connect({}, function (frame) {
+              console.log('Successfully connected to WebSocket: ' + frame);
+              stompClient.subscribe('/topic/new-product', function (productMessage) {
+                  const product = JSON.parse(productMessage.body);
+                  addNewProductToGrid(product);
+              });
+          });
+      }
+
+      function addNewProductToGrid(product) {
+          const productGrid = document.getElementById('product-grid-container');
+          const noProductsMessage = document.getElementById('no-products-message');
+
+          if (noProductsMessage) {
+              noProductsMessage.style.display = 'none';
+          }
+
+          let locationString = '';
+          if (product.city && product.region && product.region.name) {
+              locationString = `${product.city}, ${product.region.name}`;
+          } else if (product.city) {
+              locationString = product.city;
+          } else if (product.region && product.region.name) {
+              locationString = product.region.name;
+          }
+
+          const newProductCardHTML = `
+              <a href="/product/${product.id}" class="product-card-link">
+                  <div class="product-card" id="product-card-${product.id}">
+                      <div class="product-image-container">
+                          <img src="${product.imageStrings && product.imageStrings.length > 0 ? 'data:image/jpeg;base64,' + product.imageStrings[0] : '/img/photos/noImage.png'}" alt="Property Image" class="product-image">
+                          <button class="like-button" onclick="toggleLike(this, event, '${product.id}')">
+                              <i class="far fa-heart"></i>
+                          </button>
+                      </div>
+                      <div class="product-info">
+                          <h3 class="product-name" title="${product.name}">${product.name}</h3>
+                          ${locationString ? `
+                          <p class="product-location">
+                              <i class="fas fa-map-marker-alt"></i>
+                              <span>${locationString}</span>
+                          </p>` : ''}
+                          <p class="product-price">${new Intl.NumberFormat('bg-BG').format(product.price)} Лв.</p>
+                          <div class="product-features">
+                              <span class="feature-item"><i class="fas fa-ruler-combined"></i> ${product.area} кв.м</span>
+                              <span class="feature-item"><i class="fas fa-bed"></i> ${product.rooms} ${product.rooms == 1 ? 'стая' : 'стаи'}</span>
+                              <span class="feature-item"><i class="fas fa-tag"></i> ${product.state}</span>
+                          </div>
+                          <p class="product-description-snippet">${product.description || '&nbsp;'}</p>
+                      </div>
+                  </div>
+              </a>`;
+
+          productGrid.insertAdjacentHTML('afterbegin', newProductCardHTML);
+      }
+
+      // Initiate the WebSocket connection
+      connect();
+  });
+</script>
+
+</body>
+</html>

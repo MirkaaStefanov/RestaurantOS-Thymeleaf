@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lukeria Вход</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content">
+    <div class="form-page-wrapper">
+        <div class="form-page-container">
+            <h1 class="form-page-title">Вход</h1>
+
+            <div th:if="${param.logout}" class="form-alert alert-info">
+                Успешно излязохте от системата.
+            </div>
+            <div th:if="${param.confirmed}" class="form-alert alert-success">
+                Имейлът е потвърден успешно! Моля, влезте.
+            </div>
+            <div th:if="${param.resetSuccess}" class="form-alert alert-success">
+                Паролата е сменена успешно! Моля, влезте.
+            </div>
+            <div th:if="${param.oauth_init_failed}" class="form-alert alert-warning">
+                Грешка при инициализиране на вход с Google.
+            </div>
+            <div th:if="${param.error}" class="form-alert alert-danger">
+                Грешен имейл или парола.
+            </div>
+
+            <form th:action="@{/auth/login}" th:object="${loginRequest}" method="post" class="styled-form">
+
+                <div class="form-group">
+                    <label for="username" class="form-label">Имейл</label>
+                    <input type="email" id="username" th:field="*{email}" class="form-control" placeholder="Въведете имейла си"
+                           required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Парола</label>
+                    <input type="password" id="password" th:field="*{password}" class="form-control"
+                           placeholder="Въведете паролата си" required>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-form-submit">Влез</button>
+                </div>
+
+                <div class="form-link-group">
+                    <a th:href="@{/forgot-password}" class="form-link">Забравена парола?</a>
+                </div>
+
+                <div class="form-text-divider">
+                    <span>Или</span>
+                </div>
+
+                <div class="form-group">
+                    <a th:href="@{/login/google}" class="btn-google">
+                        <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google Logo"> Продължи с Google
+                    </a>
+                </div>
+
+                <div class="form-link-group register-link-group">
+                    <span>Нямате акаунт?</span>
+                    <a th:href="@{/auth/register}" class="btn-form-secondary">Регистрация</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.toggle('collapsed');
+
+        // Optional: for mobile responsiveness, if you have an overlay
+        // if (window.innerWidth <= 768) {
+        //     sidebar.classList.toggle('expanded'); // For mobile specific show/hide
+        // }
+    }
+</script>
+
+</body>
+</html>
