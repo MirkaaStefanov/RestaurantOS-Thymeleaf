@@ -30,7 +30,7 @@
             <div th:if="${param.oauth_init_failed}" class="form-alert alert-warning">
                 Грешка при инициализиране на вход с Google.
             </div>
-            <div th:if="${param.error}" class="form-alert alert-danger">
+            <div th:if="${error}" class="form-alert alert-danger">
                 Грешен имейл или парола.
             </div>
 

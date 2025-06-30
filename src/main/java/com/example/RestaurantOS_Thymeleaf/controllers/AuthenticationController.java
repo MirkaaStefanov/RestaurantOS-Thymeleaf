@@ -92,7 +92,14 @@ public class AuthenticationController {
             }
 
         } catch (Exception e) {
+            // Add the error message
             modelAndView.addObject("error", "Невалидно име или парола");
+
+            // *** CRUCIAL FIX: Add the authenticationRequest object back to the model ***
+            // This ensures th:object="${loginRequest}" can find the object it needs.
+            // It also has the benefit of pre-filling the email field with what the user typed.
+            modelAndView.addObject("loginRequest", authenticationRequest); // <--- ADD THIS LINE
+
             return modelAndView;
         }
     }
