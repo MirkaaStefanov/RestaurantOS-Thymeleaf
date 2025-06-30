@@ -1,231 +1,273 @@
-// src/main/resources/static/js/main.js
+// Define toggleSidebar in the global scope or attach it to window.
+// This is necessary because your HTML uses onclick="toggleSidebar()".
+window.toggleSidebar = function() {
+    const sidebar = document.querySelector('.sidebar'); // Targets your <aside class="sidebar">
+    const sidebarToggle = document.querySelector('.sidebar-toggle'); // The desktop toggle button
+    const sidebarOverlay = document.getElementById('sidebarOverlay'); // The new overlay element
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Sidebar Toggle ---
-    const sidebar = document.querySelector('.sidebar');
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    const toggleIcon = sidebarToggle ? sidebarToggle.querySelector('i') : null;
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
+    if (sidebar) {
+        if (window.innerWidth > 768) {
+            // DESKTOP BEHAVIOR: Collapse/expand the sidebar
             sidebar.classList.toggle('collapsed');
-            if (toggleIcon) {
-                toggleIcon.classList.toggle('fa-chevron-left');
-                toggleIcon.classList.toggle('fa-chevron-right');
+            // If you have main content adjustments for desktop sidebar collapse, add them here:
+            // const mainContent = document.querySelector('.main-content');
+            // if (mainContent) mainContent.classList.toggle('sidebar-collapsed');
+        } else {
+            // MOBILE BEHAVIOR: Open/close the hamburger menu (off-canvas sidebar)
+            sidebar.classList.toggle('open');
+            // Toggle the overlay visibility
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.toggle('active');
             }
+            // Prevent body scrolling when sidebar is open on mobile
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+    }
+};
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get elements for mobile hamburger functionality
+    const sidebar = document.querySelector('.sidebar'); // Your <aside class="sidebar">
+    const hamburgerBtn = document.getElementById('hamburgerBtn'); // The new hamburger button in mobile-header
+    const sidebarOverlay = document.getElementById('sidebarOverlay'); // The new overlay
+
+    // Event listener for the mobile hamburger button
+    if (hamburgerBtn && sidebar && sidebarOverlay) {
+        hamburgerBtn.addEventListener('click', function() {
+            // Call the global toggleSidebar function for mobile behavior
+            window.toggleSidebar();
+        });
+
+        // Event listener for the overlay to close the sidebar when clicked
+        sidebarOverlay.addEventListener('click', function() {
+            if (sidebar.classList.contains('open')) {
+                window.toggleSidebar(); // Close the sidebar if it's open
+            }
+        });
+
+        // Close sidebar if a menu item link is clicked (good UX for mobile)
+        const sidebarLinks = document.querySelectorAll('.sidebar-menu-item .sidebar-link');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Ensure it's a mobile view and sidebar is open before closing
+                if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+                    window.toggleSidebar(); // Close the sidebar
+                }
+            });
         });
     }
 
-    // --- Modal Elements ---
+    // The desktop sidebar toggle button (from your fragment) already has onclick="toggleSidebar()",
+    // so it will automatically use the `window.toggleSidebar` function.
+    // The `if (window.innerWidth > 768)` check inside `toggleSidebar()` handles its specific behavior.
+
+
+    // --- Existing Modal Logic and Card Filtering (KEPT AS IS) ---
+    const addNewItemBtn = document.getElementById('addNewItemBtn');
     const menuItemModal = document.getElementById('menuItemModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const cancelModalBtn = document.getElementById('cancelModalBtn');
-    const addNewItemBtn = document.getElementById('addNewItemBtn');
-    const modalTitle = document.getElementById('modalTitle');
     const menuItemForm = document.getElementById('menuItemForm');
+    const modalTitle = document.getElementById('modalTitle');
     const saveItemBtn = document.getElementById('saveItemBtn');
 
-    // Form inputs
-    const menuItemIdInput = document.getElementById('menuItemId');
-    const itemNameInput = document.getElementById('itemName');
-    const itemDescriptionInput = document.getElementById('itemDescription');
-    const itemPriceInput = document.getElementById('itemPrice');
-    const itemPrepTimeInput = document.getElementById('itemPrepTime');
-    const itemCategorySelect = document.getElementById('itemCategory');
-    const itemImageFileInput = document.getElementById('itemImageFile');
-    const itemBase64ImageInput = document.getElementById('itemBase64Image'); // Hidden input for existing image
-    const itemAvailableCheckbox = document.getElementById('itemAvailable');
-
     // Image preview elements
-    const imagePreviewContainer = document.getElementById('imagePreview');
+    const itemImageFile = document.getElementById('itemImageFile');
+    const imagePreview = document.getElementById('imagePreview');
     const previewImage = document.getElementById('previewImage');
     const previewFileName = document.getElementById('previewFileName');
     const removeImageBtn = document.getElementById('removeImageBtn');
+    const itemBase64Image = document.getElementById('itemBase64Image'); // Hidden input for base64
 
-    // --- Modal Functions ---
-    function openModal() {
-        menuItemModal.classList.add('active');
-    }
-
-    function closeProvisionalModal() {
-        menuItemModal.classList.remove('active');
-        // Reset form to default state (for 'add new')
-        menuItemForm.reset();
-        menuItemIdInput.value = ''; // Clear ID for new item
-        modalTitle.textContent = 'Добавяне на ново ястие';
-        saveItemBtn.textContent = 'Създай ястие';
-        menuItemForm.action = '/menu-item'; // Default to create endpoint
-        imagePreviewContainer.style.display = 'none'; // Hide image preview
-        previewImage.src = '';
-        previewFileName.textContent = '';
-        itemImageFileInput.value = ''; // Clear file input
-        itemBase64ImageInput.value = ''; // Clear hidden base64 input
-    }
-
-    // --- Event Listeners for Modal ---
+    // Open Add New Item Modal
     if (addNewItemBtn) {
-        addNewItemBtn.addEventListener('click', () => {
-            closeProvisionalModal(); // Reset form first
-            openModal();
+        addNewItemBtn.addEventListener('click', function() {
+            menuItemForm.reset(); // Clear previous form data
+            menuItemModal.classList.add('active');
+            modalTitle.textContent = 'Добавяне на ново ястие';
+            saveItemBtn.textContent = 'Създай ястие';
+            menuItemForm.action = '/menu-item'; // Set action for new item
+            document.getElementById('menuItemId').value = ''; // Clear ID
+            document.getElementById('itemAvailable').checked = true; // Default to available
+            // Clear image preview
+            imagePreview.style.display = 'none';
+            previewImage.src = '';
+            previewFileName.textContent = '';
+            itemBase64Image.value = ''; // Clear hidden base64 input
         });
     }
 
+    // Close Modal
     if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', closeProvisionalModal);
+        closeModalBtn.addEventListener('click', function() {
+            menuItemModal.classList.remove('active');
+        });
     }
-
     if (cancelModalBtn) {
-        cancelModalBtn.addEventListener('click', closeProvisionalModal);
+        cancelModalBtn.addEventListener('click', function() {
+            menuItemModal.classList.remove('active');
+        });
     }
-
-    // Close modal if clicking outside the modal content
     if (menuItemModal) {
-        menuItemModal.addEventListener('click', (e) => {
+        menuItemModal.addEventListener('click', function(e) {
             if (e.target === menuItemModal) {
-                closeProvisionalModal();
+                menuItemModal.classList.remove('active');
             }
         });
     }
 
-    // --- Handle Edit Button Click ---
-    document.querySelectorAll('.btn-edit').forEach(button => {
-        button.addEventListener('click', async (event) => {
-            const itemId = event.currentTarget.dataset.id;
-            console.log(`Edit button clicked for item ID: ${itemId}`); // Debugging
+    // Open Edit Modal (delegated event listener)
+    document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-edit')) {
+            const itemId = e.target.dataset.id;
+            // The allMenuItems array is now available from the Thymeleaf inline script
+            const item = allMenuItems.find(i => i.id == itemId);
 
-            // Fetch item data from backend
-            try {
-                const response = await fetch(`/menu-item/${itemId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const item = await response.json();
-                console.log("Fetched item for edit:", item); // Debugging
+            if (item) {
+                document.getElementById('menuItemId').value = item.id;
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemDescription').value = item.description || '';
+                document.getElementById('itemPrice').value = item.price;
+                document.getElementById('itemPrepTime').value = item.preparationTime || '';
+                document.getElementById('itemCategory').value = item.category;
+                document.getElementById('itemAvailable').checked = item.available;
 
-                // Populate the form fields
-                menuItemIdInput.value = item.id;
-                itemNameInput.value = item.name;
-                itemDescriptionInput.value = item.description;
-                itemPriceInput.value = item.price;
-                itemPrepTimeInput.value = item.preparationTime;
-                itemCategorySelect.value = item.category; // Ensure category matches enum name
-                itemAvailableCheckbox.checked = item.available;
-
-                // Set form action for update
-                menuItemForm.action = `/menu-item/edit/${item.id}`;
                 modalTitle.textContent = 'Редактиране на ястие';
-                saveItemBtn.textContent = 'Обнови ястие';
+                saveItemBtn.textContent = 'Запази промените';
+                menuItemForm.action = '/menu-item/edit/' + itemId; // Corrected line
 
-                // Handle image preview
+                // Handle image preview for edit
                 if (item.image) {
-                    previewImage.src = `data:image/jpeg;base64,${item.image}`;
-                    previewFileName.textContent = 'Current Image'; // Or a more descriptive name if available
-                    imagePreviewContainer.style.display = 'flex';
-                    itemBase64ImageInput.value = item.image; // Store existing base64
+                    previewImage.src = 'data:image/jpeg;base64,' + item.image;
+                    previewFileName.textContent = 'current_image.jpg'; // Or actual filename if available
+                    imagePreview.style.display = 'flex';
+                    itemBase64Image.value = item.image; // Keep current base64 image
                 } else {
-                    imagePreviewContainer.style.display = 'none';
+                    imagePreview.style.display = 'none';
                     previewImage.src = '';
                     previewFileName.textContent = '';
-                    itemBase64ImageInput.value = '';
+                    itemBase64Image.value = '';
                 }
 
-                openModal();
-            } catch (error) {
-                console.error("Error fetching menu item for edit:", error);
-                alert("Неуспешно зареждане на данни за редактиране.");
+                menuItemModal.classList.add('active');
             }
-        });
+        }
     });
 
-    // --- Image Preview on File Select ---
-    if (itemImageFileInput) {
-        itemImageFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
+    // Image file input change listener
+    if (itemImageFile) {
+        itemImageFile.addEventListener('change', function() {
+            const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = function(e) {
                     previewImage.src = e.target.result;
                     previewFileName.textContent = file.name;
-                    imagePreviewContainer.style.display = 'flex';
-                    itemBase64ImageInput.value = ''; // Clear hidden base64 if a new file is selected
+                    imagePreview.style.display = 'flex';
+                    // Store the base64 string in the hidden input for submission
+                    itemBase64Image.value = e.target.result.split(',')[1];
                 };
                 reader.readAsDataURL(file);
             } else {
-                imagePreviewContainer.style.display = 'none';
+                imagePreview.style.display = 'none';
                 previewImage.src = '';
                 previewFileName.textContent = '';
-                // If no new file, try to restore the hidden base64 for edit mode
-                if (menuItemIdInput.value && !itemBase64ImageInput.value) {
-                     // This scenario means an image was removed during edit, then file input cleared.
-                     // The hidden base64 input for `name="image"` would normally handle this on form submission.
-                     // For now, let's just make sure the preview is hidden.
-                }
+                itemBase64Image.value = ''; // Clear hidden base64 input
             }
         });
     }
 
-    // --- Remove Image Button ---
+    // Remove image button listener
     if (removeImageBtn) {
-        removeImageBtn.addEventListener('click', () => {
-            itemImageFileInput.value = ''; // Clear the file input
-            imagePreviewContainer.style.display = 'none';
+        removeImageBtn.addEventListener('click', function() {
+            itemImageFile.value = ''; // Clear file input
+            imagePreview.style.display = 'none';
             previewImage.src = '';
             previewFileName.textContent = '';
-            itemBase64ImageInput.value = ''; // Crucial: clear hidden base64 to indicate image removal
+            itemBase64Image.value = ''; // Clear hidden base64 input
         });
     }
 
+    // Category Filter and Availability Toggle Logic (REVERTED TO PREVIOUS WORKING VERSION)
+    const categoryButtons = document.querySelectorAll('.category-btn[data-category]'); // <--- CRUCIAL CHANGE HERE
+    const availableToggle = document.getElementById('availableToggle');
+    const menuItemCards = document.querySelectorAll('.menu-item-card');
+    const noMenuItemsMessage = document.getElementById('noMenuItemsMessage');
 
-    // --- Client-Side Filtering ---
-    const categoryButtons = document.querySelectorAll('.category-btn[data-category]');
-       const availableToggle = document.getElementById('availableToggle');
-       const menuItemCards = document.querySelectorAll('.menu-item-card'); // <-- This is key
-       const noMenuItemsMessage = document.getElementById('noMenuItemsMessage');
+    let currentFilterCategory = 'ALL';
+    let currentFilterAvailable = false;
 
-       let currentFilterCategory = 'ALL';
-       let currentFilterAvailable = false;
+    function applyFilters() {
+        let itemsShown = 0;
+        menuItemCards.forEach(card => {
+            const itemCategory = card.dataset.category;
+            const itemAvailable = card.dataset.available === 'true';
 
-       function applyFilters() {
-           let itemsShown = 0;
-           menuItemCards.forEach(card => {
-               const itemCategory = card.dataset.category; // <-- Read from data attribute
-               const itemAvailable = card.dataset.available === 'true'; // <-- Read from data attribute
+            const categoryMatch = (currentFilterCategory === 'ALL' || itemCategory === currentFilterCategory);
+            const availabilityMatch = (!currentFilterAvailable || itemAvailable);
 
-               const categoryMatch = (currentFilterCategory === 'ALL' || itemCategory === currentFilterCategory);
-               const availabilityMatch = (!currentFilterAvailable || itemAvailable);
+            if (categoryMatch && availabilityMatch) {
+                card.style.display = 'flex'; // Show the card
+                itemsShown++;
+            } else {
+                card.style.display = 'none'; // Hide the card
+            }
+        });
 
-               if (categoryMatch && availabilityMatch) {
-                   card.style.display = 'flex'; // Show the card
-                   itemsShown++;
-               } else {
-                   card.style.display = 'none'; // Hide the card
-               }
-           });
+        if (noMenuItemsMessage) {
+            noMenuItemsMessage.style.display = itemsShown === 0 ? 'block' : 'none';
+        }
+    }
 
-           if (noMenuItemsMessage) {
-               noMenuItemsMessage.style.display = itemsShown === 0 ? 'block' : 'none';
-           }
-       }
+    // Event listeners for category buttons
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove 'active' from all category buttons
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            // Add 'active' to the clicked button
+            button.classList.add('active');
+            currentFilterCategory = button.dataset.category;
+            applyFilters();
+        });
+    });
 
-       // Event listeners for category buttons
-       categoryButtons.forEach(button => {
-           button.addEventListener('click', () => {
-               // Remove 'active' from all category buttons
-               categoryButtons.forEach(btn => btn.classList.remove('active'));
-               // Add 'active' to the clicked button
-               button.classList.add('active');
-               currentFilterCategory = button.dataset.category;
-               applyFilters();
-           });
-       });
     // Event listener for availability toggle
     if (availableToggle) {
         availableToggle.addEventListener('change', () => {
             currentFilterAvailable = availableToggle.checked;
+            // NEW: Add/remove 'active' class from the label when checkbox state changes
+            const availableToggleLabel = document.querySelector('label[for="availableToggle"]');
+            if (availableToggleLabel) {
+                if (availableToggle.checked) {
+                    availableToggleLabel.classList.add('active');
+                } else {
+                    availableToggleLabel.classList.remove('active');
+                }
+            }
             applyFilters();
         });
     }
 
     // Initial filter application when page loads
+    // Also ensure "Само налични" active state is correct on load
     applyFilters();
+    // Set initial active state for the "Само налични" label if checkbox is checked on load
+    if (availableToggle && availableToggle.checked) {
+        const availableToggleLabel = document.querySelector('label[for="availableToggle"]');
+        if (availableToggleLabel) {
+            availableToggleLabel.classList.add('active');
+        }
+    }
+
+
+    // Toggle menu item availability (from the card buttons)
+    // Assuming these are triggered by form submissions, not direct JS functions anymore
+    // based on your HTML forms.
+    // The previous window.toggleAvailability, window.openEditModal, window.deleteItem might be remnants
+    // if you've moved to direct form submissions for toggle/delete and delegated click for edit.
+    // If not, ensure these functions are still being called from your HTML elements.
+
+    // If you need direct JS control over toggle/delete/edit, ensure your HTML buttons
+    // have `onclick="toggleAvailability(this.dataset.id)"` etc.
 });

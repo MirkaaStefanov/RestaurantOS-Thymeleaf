@@ -23,7 +23,56 @@ a:hover {
     text-decoration: underline;
 }
 
+/* --- Mobile Header (NEW) --- */
+.mobile-header {
+    display: none; /* Hidden by default for desktop */
+    background-color: #ffffff;
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    z-index: 1000; /* Ensure it's above other content */
+    position: sticky; /* Make it stick to the top on scroll */
+    top: 0;
+}
+
+.hamburger-menu {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    padding: 5px;
+    display: flex; /* Center the icon */
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-header-logo {
+    display: flex;
+    align-items: center;
+}
+
+.mobile-header-logo .logo-hm {
+    background-color: #ffc107;
+    color: #333;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    font-weight: 700;
+}
+
+.mobile-header-logo .logo-rp {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    white-space: nowrap;
+}
+
+
 /* --- Sidebar Styling --- */
+/* This targets your <aside class="sidebar"> element */
 .sidebar {
     width: 250px;
     background-color: #ffffff; /* White background for sidebar */
@@ -31,9 +80,9 @@ a:hover {
     padding: 20px 0;
     display: flex;
     flex-direction: column;
-    transition: width 0.3s ease, transform 0.3s ease;
+    transition: width 0.3s ease, transform 0.3s ease, left 0.3s ease; /* Added left for mobile */
     flex-shrink: 0;
-    position: relative;
+    position: relative; /* Default for desktop layout */
     z-index: 1000;
 }
 
@@ -222,10 +271,6 @@ a:hover {
     padding: 10px;
 }
 
-.sidebar.collapsed .logout-btn i {
-    margin-right: 0;
-}
-
 .sidebar.collapsed .logout-btn span {
     opacity: 0;
     width: 0;
@@ -239,7 +284,7 @@ a:hover {
     transform: translateY(-1px);
 }
 
-/* Sidebar Toggle Button */
+/* Sidebar Toggle Button (for desktop collapse, comes from your fragment) */
 .sidebar-toggle {
     position: absolute;
     top: 20px;
@@ -271,6 +316,7 @@ a:hover {
     transform: rotate(180deg);
 }
 
+
 /* --- Main Content Area --- */
 .main-content {
     flex-grow: 1; /* Takes remaining space */
@@ -278,7 +324,6 @@ a:hover {
     background-color: #f0f2f5; /* Match body background */
     margin: 0;
     border-radius: 0;
-    /* Added for consistent centering of forms within main-content */
     display: flex;
     flex-direction: column;
     align-items: center; /* Center items horizontally within main-content */
@@ -409,7 +454,7 @@ a:hover {
     display: flex;
     flex-wrap: wrap; /* Allows cards to wrap to the next line */
     gap: 20px; /* Space between cards, adjusted to be slightly smaller */
-    justify-content: flex-start; /* <<< CHANGED: Align cards from left to right */
+    justify-content: flex-start; /* Align cards from left to right */
     align-items: flex-start; /* Align cards to the start of the cross-axis (top) */
     width: 100%; /* Ensure grid spans full width to allow aligning from left */
     max-width: 1200px; /* Limit grid width for very large screens */
@@ -429,16 +474,10 @@ a:hover {
     flex-shrink: 0; /* Prevents cards from shrinking below their width */
     flex-grow: 0; /* Prevents cards from growing to fill extra space */
 }
+
 .menu-item-card:hover {
     transform: translateY(-5px); /* Slight lift on hover */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
-}
-
-.name-availability-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center; /* Vertically align items in this row */
-    margin-bottom: 4px; /* Space below this row */
 }
 
 /* Corrected image class name from .menu-item-image to .product-image */
@@ -457,6 +496,42 @@ a:hover {
     flex-grow: 1; /* Allows content to take available space and push actions to bottom */
 }
 
+/* Layout for Name and Availability Tag */
+.name-availability-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically align items in this row */
+    margin-bottom: 4px; /* Space below this row */
+}
+
+.menu-item-name {
+    font-size: 18px; /* Slightly smaller font */
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap; /* Prevents name from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds "..." for overflowing text */
+    flex-grow: 1; /* Allow name to take available space */
+}
+
+.menu-item-availability {
+    font-size: 13px; /* Slightly smaller font */
+    font-weight: 500;
+    padding: 3px 7px; /* Reduced padding */
+    border-radius: 4px;
+    flex-shrink: 0; /* Prevents availability tag from shrinking */
+}
+
+.available-status {
+    color: #28a745;
+    background-color: #e6ffed;
+}
+
+.not-available-status {
+    color: #dc3545;
+    background-color: #ffe6e6;
+}
+
 .menu-item-category {
     font-size: 12px; /* Slightly smaller font */
     font-weight: 500;
@@ -469,21 +544,11 @@ a:hover {
     align-self: flex-start; /* Aligns tag to the left */
 }
 
-.menu-item-name {
-    font-size: 18px; /* Slightly smaller font */
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 4px; /* Reduced margin */
-    white-space: nowrap; /* Prevents name from wrapping */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Adds "..." for overflowing text */
-}
-
 .menu-item-description {
     font-size: 13px; /* Smaller description text */
     color: #666;
     line-height: 1.4;
-    height: 35px; /* FIXED HEIGHT FOR DESCRIPTION - REDUCED to fit 2 lines */
+    height: 40px; /* FIXED HEIGHT FOR DESCRIPTION - REDUCED to fit 2 lines */
     overflow: hidden;
     text-overflow: ellipsis; /* Ensures ellipsis for overflowing text */
     display: -webkit-box;
@@ -499,6 +564,7 @@ a:hover {
     margin-top: auto; /* Pushes price/prep time to the bottom */
     padding-top: 10px; /* Add some space above details */
     border-top: 1px solid #eee; /* Separator line */
+    margin-bottom: 10px; /* Added margin below details to push buttons down */
 }
 
 .menu-item-price {
@@ -520,28 +586,8 @@ a:hover {
     color: #999;
 }
 
-.menu-item-availability {
-    font-size: 13px; /* Slightly smaller font */
-    font-weight: 500;
-    margin-top: 8px; /* Reduced margin */
-    padding: 3px 7px; /* Reduced padding */
-    border-radius: 4px;
-    display: inline-block; /* To make background apply only to text width */
-    align-self: flex-start; /* Aligns tag to the left */
-}
-
-.available-status {
-    color: #28a745;
-    background-color: #e6ffed;
-}
-
-.not-available-status {
-    color: #dc3545;
-    background-color: #ffe6e6;
-}
-
 .menu-item-actions {
-    margin-top: 15px; /* Reduced margin */
+    margin-top: auto; /* Push buttons to the bottom of the card content */
     display: flex;
     gap: 8px; /* Reduced gap */
     justify-content: flex-end; /* Align buttons to the right */
@@ -807,19 +853,15 @@ a:hover {
 }
 
 /* --- LOGIN / REGISTER FORM STYLES --- */
-/* These styles target the login/register forms which are likely on their own pages */
-/* They need to be robustly centered and responsive */
-
-/* Make form-page-wrapper take full height to center content vertically and horizontally */
 .form-page-wrapper {
-    flex-grow: 1; /* Allow to take available space within main-content */
+    flex-grow: 1;
     display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
+    justify-content: center;
+    align-items: center;
     padding: 20px;
     box-sizing: border-box;
-    width: 100%; /* Ensure it takes full width of main-content to allow centering */
-    max-width: 1200px; /* Match max-width of other main-content children for consistent page layout */
+    width: 100%;
+    max-width: 1200px;
 }
 
 .form-page-container {
@@ -827,11 +869,11 @@ a:hover {
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     padding: 40px;
-    width: 100%; /* Take full width of its parent (form-page-wrapper's flex item) */
-    max-width: 450px; /* Keep max-width for the form itself */
+    width: 100%;
+    max-width: 450px;
     box-sizing: border-box;
     text-align: center;
-    margin: 0 auto; /* Explicitly center horizontally within its allocated space */
+    margin: 0 auto;
 }
 
 .form-page-title {
@@ -845,12 +887,12 @@ a:hover {
 .styled-form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between form groups */
+    gap: 20px;
 }
 
 .form-group {
-    text-align: left; /* Align labels and inputs to the left */
-    margin-bottom: 0; /* Let gap handle spacing, or specify if needed */
+    text-align: left;
+    margin-bottom: 0;
 }
 
 .form-label {
@@ -864,8 +906,8 @@ a:hover {
 .form-control {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #ddd; /* Lighter border */
-    border-radius: 8px; /* Slightly more rounded inputs */
+    border: 1px solid #ddd;
+    border-radius: 8px;
     font-size: 16px;
     box-sizing: border-box;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -878,15 +920,15 @@ a:hover {
 }
 
 .btn-form-submit {
-    background-color: #007bff; /* Bright blue */
-    color: #fff; /* White text */
+    background-color: #007bff;
+    color: #fff;
     padding: 12px 25px;
-    border: none; /* Ensure no border that could obscure it */
+    border: none;
     border-radius: 8px;
     font-size: 17px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    width: 100%; /* Full width button */
+    width: 100%;
     font-weight: 600;
     margin-top: 10px;
 }
@@ -943,8 +985,8 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fff; /* White background */
-    color: #4285f4; /* Google blue text */
+    background-color: #fff;
+    color: #4285f4;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 12px 25px;
@@ -996,15 +1038,26 @@ a:hover {
     text-decoration: none;
 }
 
+/* Sidebar Overlay (NEW) */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 1050; /* Above main content, below sidebar */
+    display: none; /* Hidden by default */
+}
+
+
 /* Responsive Adjustments */
 @media (max-width: 992px) { /* Adjust sidebar for tablets */
     .sidebar {
         width: 200px;
         padding: 15px;
     }
-    .sidebar-title {
-        font-size: 1.5em;
-    }
+    /* No change to sidebar-title here, as it's hidden on mobile */
     .sidebar-link {
         font-size: 1em;
         padding: 10px 12px;
@@ -1059,42 +1112,61 @@ a:hover {
 
 @media (max-width: 768px) { /* Adjust for mobile phones */
     body {
-        flex-direction: column; /* Stack sidebar and main content vertically */
+        /* On mobile, body should typically be display: block or manage its children specifically.
+           For this layout, we'll let main-content take full width and flow below the fixed mobile-header. */
+        display: block; /* Change body to block to stack mobile-header and main-content */
+        overflow-x: hidden; /* Prevent horizontal scroll due to off-canvas sidebar */
     }
+
+    /* Show mobile header on small screens */
+    .mobile-header {
+        display: flex;
+    }
+
+    /* Hide desktop sidebar and make it a hidden off-canvas menu */
     .sidebar {
-        position: static; /* No longer sticky */
-        width: 100%;
-        height: auto; /* Allow content to dictate height */
-        padding: 10px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        z-index: 999; /* Ensure it's above main content on scroll */
+        position: fixed; /* Fixed position for off-canvas */
+        top: 0;
+        left: -250px; /* Start off-screen to the left */
+        height: 100vh;
+        width: 250px; /* Fixed width for the mobile sidebar */
+        padding: 20px 0;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        z-index: 1100; /* Ensure it's above the overlay and main content */
+        transition: left 0.3s ease; /* Smooth slide in/out */
     }
+
+    /* Class added by JS to open the sidebar */
+    .sidebar.open {
+        left: 0; /* Slide into view */
+    }
+
+    /* Hide the desktop sidebar toggle button (from your fragment) */
+    .sidebar-toggle {
+        display: none;
+    }
+
+    /* Hide elements specific to desktop sidebar layout on mobile */
     .sidebar-header {
-        margin-bottom: 15px;
-    }
-    .sidebar-menu { /* Ensure horizontal scrolling for menu items */
-        flex-direction: row;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 10px;
-    }
-    .sidebar-menu-item {
-        display: inline-block;
-        margin-right: 10px;
-        margin-bottom: 0;
-    }
-    .sidebar-menu-item:last-child {
-        margin-right: 0;
+        display: none; /* Hide the full sidebar header on mobile */
     }
     .sidebar-footer {
         display: none; /* Hide footer on small screens */
     }
 
-    .main-content {
-        margin: 10px;
-        padding: 15px;
-        align-items: center; /* Center items on small screens too */
+    /* Show the overlay when sidebar is open */
+    .sidebar-overlay.active {
+        display: block;
     }
+
+    .main-content {
+        margin-top: 0; /* Remove top margin that might be left from desktop layout */
+        /* You might want a padding-top on main-content equal to mobile-header's height if not sticky */
+        padding-top: 15px; /* Adjust padding if needed to account for fixed header */
+        margin: 0; /* Reset margins for mobile */
+        width: 100%; /* Ensure main content uses full width */
+    }
+
     .page-header {
         flex-direction: column;
         align-items: flex-start;
@@ -1172,5 +1244,8 @@ a:hover {
     .btn-add-item {
         font-size: 0.9em;
         padding: 10px 15px;
+    }
+    .mobile-header-logo .logo-rp {
+        font-size: 16px; /* Smaller logo text for very small screens */
     }
 }
