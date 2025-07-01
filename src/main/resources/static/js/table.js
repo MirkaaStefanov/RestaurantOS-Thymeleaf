@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     // --- DOM Elements ---
-    const tableGrid = document.querySelector('.table-grid');
-    const noTablesMessage = document.getElementById('noTablesMessage'); // Moved inside table-grid in HTML
+    const tableGrid = document.getElementById('tableGrid'); // Use ID for direct access
+    const noTablesMessage = document.getElementById('noTablesMessage');
     const addNewTableBtn = document.getElementById('addNewTableBtn');
 
     // MODAL ELEMENTS
-    const tableModalOverlay = document.getElementById('tableModalOverlay'); // This is the main modal wrapper
+    const tableModalOverlay = document.getElementById('tableModalOverlay');
     const closeTableModalBtn = document.getElementById('closeTableModalBtn');
     const cancelTableModalBtn = document.getElementById('cancelTableModalBtn');
     const tableForm = document.getElementById('tableForm');
@@ -23,101 +23,50 @@ document.addEventListener('DOMContentLoaded', function() {
     const showAvailableTablesToggle = document.getElementById('showAvailableTables');
 
     // --- State Variables ---
-    // allTables will be globally available from Thymeleaf, e.g., <script th:inline="javascript"> var allTables = [[${tables}]]; </script>
-    let currentFilteredTables = [];
+    // allTables is now populated directly from Thymeleaf in the HTML <script> block
     let currentFilterStatus = 'ALL'; // Default to show all statuses (matches "Всички" button)
     let currentFilterShowAvailableOnly = false; // Default to show all tables
 
     // --- Functions ---
 
     /**
-     * Renders table cards in the grid.
-     * @param {Array} tablesToRender - The array of table objects to display.
-     */
-    function renderTables(tablesToRender) {
-        // Clear all content in the grid, except for the noTablesMessage placeholder
-        const existingCards = tableGrid.querySelectorAll('.table-card');
-        existingCards.forEach(card => card.remove());
-
-        if (tablesToRender.length === 0) {
-            noTablesMessage.style.display = 'block';
-            // tableGrid.style.display = 'none'; // Keep grid as flex/grid to center message if desired
-        } else {
-            noTablesMessage.style.display = 'none';
-            // tableGrid.style.display = 'grid'; // Ensure grid is visible (already handled by CSS usually)
-        }
-
-        tablesToRender.forEach(table => {
-            const tableCard = document.createElement('div');
-            tableCard.className = 'table-card'; // Reusing 'menu-item-card' style if similar CSS
-            tableCard.setAttribute('data-id', table.id); // Store ID for easy access
-            tableCard.setAttribute('data-status', table.status); // For filtering
-            tableCard.setAttribute('data-available', table.status === 'AVAILABLE'); // For the "available only" toggle
-
-            // Determine status display text and class
-            let statusText = '';
-            let statusClass = '';
-            switch (table.status) {
-                case 'AVAILABLE':
-                    statusText = 'Налична';
-                    statusClass = 'available-status'; // Using consistency from menu-item if available-status is green
-                    break;
-                case 'OCCUPIED':
-                    statusText = 'Заета';
-                    statusClass = 'occupied-status'; // Define this in your CSS
-                    break;
-                case 'RESERVED':
-                    statusText = 'Резервирана';
-                    statusClass = 'reserved-status'; // Define this in your CSS
-                    break;
-                case 'NEEDS_CLEANING':
-                    statusText = 'За почистване';
-                    statusClass = 'needs-cleaning-status'; // Define this in your CSS
-                    break;
-                default:
-                    statusText = table.status;
-                    statusClass = '';
-            }
-
-            // Construct the inner HTML similar to menu-item-card
-            tableCard.innerHTML = `
-                <div class="table-card-header">
-                    <h3 class="table-number">Маса ${table.number}</h3>
-                    <span class="table-availability ${statusClass}">${statusText}</span>
-                </div>
-                <div class="table-card-body">
-                    <p class="table-capacity"><i class="fas fa-chair"></i> Капацитет: ${table.capacity} места</p>
-                    ${table.currentOrder ? `<p class="table-order"><i class="fas fa-clipboard-list"></i> Поръчка: ${table.currentOrder}</p>` : ''}
-                    ${table.currentWaiter ? `<p class="table-waiter"><i class="fas fa-user-tie"></i> Сервитьор: ${table.currentWaiter}</p>` : ''}
-                </div>
-                <div class="table-card-actions">
-                    <button class="btn btn-use" data-action="use" data-id="${table.id}">Използвай</button>
-                    <button class="btn btn-edit" data-action="edit" data-id="${table.id}">Редактирай</button>
-                    <button class="btn btn-delete" data-action="delete" data-id="${table.id}"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            `;
-            tableGrid.appendChild(tableCard);
-        });
-    }
-
-    /**
-     * Applies filters and re-renders tables.
+     * Applies filters to the already rendered table cards.
+     * It iterates through the DOM elements and shows/hides them.
      */
     function applyFilters() {
-        let filtered = allTables; // Start with all tables (from global Thymeleaf variable)
+        const allTableCards = tableGrid.querySelectorAll('.table-card');
+        let visibleCount = 0;
 
-        // Filter by status if a specific status is selected (and not 'ALL')
-        if (currentFilterStatus && currentFilterStatus !== 'ALL') {
-            filtered = filtered.filter(table => table.status === currentFilterStatus);
+        allTableCards.forEach(card => {
+            const cardStatus = card.dataset.status; // e.g., 'AVAILABLE', 'OCCUPIED'
+            const isCardAvailable = card.dataset.available === 'true'; // boolean from data-available
+
+            let isVisible = true;
+
+            // Apply status filter
+            if (currentFilterStatus !== 'ALL' && cardStatus !== currentFilterStatus) {
+                isVisible = false;
+            }
+
+            // Apply 'show available only' toggle filter
+            if (currentFilterShowAvailableOnly && !isCardAvailable) {
+                isVisible = false;
+            }
+
+            if (isVisible) {
+                card.style.display = ''; // Show the card (uses its default display, e.g., flex or block)
+                visibleCount++;
+            } else {
+                card.style.display = 'none'; // Hide the card
+            }
+        });
+
+        // Show/hide the 'no tables message' based on filter results
+        if (visibleCount === 0) {
+            noTablesMessage.style.display = 'block';
+        } else {
+            noTablesMessage.style.display = 'none';
         }
-
-        // Filter by 'show available only' toggle
-        if (currentFilterShowAvailableOnly) {
-            filtered = filtered.filter(table => table.status === 'AVAILABLE');
-        }
-
-        currentFilteredTables = filtered;
-        renderTables(currentFilteredTables);
     }
 
     /**
@@ -131,18 +80,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (tableData) {
             modalTitle.textContent = 'Редактиране на маса';
             saveTableBtn.textContent = 'Запази промените';
-            tableForm.action = `/table/edit/${tableData.id}`; // Endpoint for editing
+            tableForm.action = `/tables/edit/${tableData.id}`; // Endpoint for editing
             tableForm.method = 'post';
 
             tableIdInput.value = tableData.id;
             tableNumberInput.value = tableData.number;
             tableCapacityInput.value = tableData.capacity;
             tableStatusSelect.value = tableData.status;
-            // No currentOrder/currentWaiter fields in modal based on HTML, so no pre-fill needed
         } else {
             modalTitle.textContent = 'Добавяне на нова маса';
             saveTableBtn.textContent = 'Създай маса';
-            tableForm.action = '/table'; // Endpoint for adding new
+            tableForm.action = '/tables'; // Endpoint for adding new
             tableForm.method = 'post';
             tableStatusSelect.value = 'AVAILABLE'; // Default new table to Available
         }
@@ -160,11 +108,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /**
      * Finds a table in the global allTables array by ID.
+     * This array is populated by Thymeleaf.
      * @param {number} id - The ID of the table to find.
      * @returns {Object|undefined} The table object if found, otherwise undefined.
      */
     function findTableById(id) {
-        return allTables.find(table => table.id === id);
+        // Ensure allTables exists and is an array before trying to find
+        if (typeof allTables !== 'undefined' && Array.isArray(allTables)) {
+            return allTables.find(table => table.id === id);
+        }
+        console.error("allTables is not defined or is not an array. Cannot find table by ID.");
+        return undefined;
     }
 
     // --- Event Listeners ---
@@ -191,57 +145,61 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Delegated event listener for Edit, Delete, Use buttons on table cards
+    // Attach to tableGrid as cards are children
     if (tableGrid) {
         tableGrid.addEventListener('click', function(e) {
-            const button = e.target.closest('.btn');
-            if (!button) return;
+            const button = e.target.closest('.btn'); // Finds the closest ancestor with class .btn
+            if (!button) return; // Not a button related to table actions
 
-            const tableId = parseInt(button.dataset.id);
-            const action = button.dataset.action;
+            const tableId = parseInt(button.dataset.id); // Get ID from data-id
             const table = findTableById(tableId);
 
             if (!table) {
-                console.error('Table not found for ID:', tableId);
+                console.error('Table data not found in JavaScript for ID:', tableId);
                 return;
             }
 
-            switch (action) {
-                case 'use':
-                    alert(`Използвай маса ${table.number} (ID: ${table.id}).\nПренасочване към страница за поръчки...`);
-                    // Example: window.location.href = `/orders?tableId=${table.id}`;
-                    break;
-                case 'edit':
-                    openTableModal(table);
-                    break;
-                case 'delete':
-                    if (confirm(`Сигурни ли сте, че искате да изтриете маса номер ${table.number}?`)) {
-                        fetch(`/table/delete/${table.id}`, {
-                                method: 'POST', // Or 'DELETE' if your backend supports it directly
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    // Include CSRF token if you use Spring Security
-                                    // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
-                                }
-                            })
-                            .then(response => {
-                                if (response.ok) {
-                                    alert(`Маса ${table.number} успешно изтрита.`);
-                                    // Remove table from allTables array and re-render
-                                    allTables = allTables.filter(t => t.id !== tableId);
-                                    applyFilters(); // Re-render with updated data
-                                } else {
-                                    return response.text().then(text => { throw new Error(text) });
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error deleting table:', error);
-                                alert('Възникна грешка при изтриването на масата: ' + error.message);
-                            });
-                    }
-                    break;
+            // Determine action based on button class or specific data-action attribute if present
+            if (button.classList.contains('btn-use')) {
+                alert(`Използвай маса №${table.number} (ID: ${table.id}).\nПренасочване към страница за поръчки...`);
+                // Example: window.location.href = `/orders?tableId=${table.id}`;
+            } else if (button.classList.contains('btn-edit')) {
+                openTableModal(table);
+            } else if (button.classList.contains('btn-delete')) {
+                // The HTML form for delete already handles the confirmation and submission.
+                // This block is primarily for demonstration if you were to use AJAX for delete.
+                // Since your Thymeleaf form already has `onsubmit="return confirm(...)"`,
+                // this JavaScript delete action is not strictly necessary unless you switch to AJAX.
+                // If you remove the <form> tag around the delete button in HTML, uncomment this:
+                /*
+                if (confirm(`Сигурни ли сте, че искате да изтриете маса номер ${table.number}?`)) {
+                    fetch(`/tables/delete/${table.id}`, { // Adjust endpoint as per your Spring Controller
+                        method: 'POST', // Or 'DELETE' if your backend expects it
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content') // If using Spring Security CSRF
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert(`Маса №${table.number} успешно изтрита.`);
+                            // Remove table from allTables array and re-apply filters to update UI
+                            allTables = allTables.filter(t => t.id !== tableId);
+                            applyFilters(); // Update the displayed cards
+                        } else {
+                            return response.text().then(text => { throw new Error(text) });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting table:', error);
+                        alert('Възникна грешка при изтриването на масата: ' + error.message);
+                    });
+                }
+                */
             }
         });
     }
+
 
     // Filter by status category buttons
     statusCategoryButtons.forEach(button => {
@@ -252,6 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
 
             currentFilterStatus = this.dataset.status; // Get the status from data-status attribute
+
+            // If a specific status button is clicked, uncheck 'Show Available Only'
+            if (currentFilterStatus !== 'AVAILABLE') {
+                showAvailableTablesToggle.checked = false;
+            }
+
             applyFilters();
         });
     });
@@ -260,44 +224,57 @@ document.addEventListener('DOMContentLoaded', function() {
     if (showAvailableTablesToggle) {
         showAvailableTablesToggle.addEventListener('change', function() {
             currentFilterShowAvailableOnly = this.checked;
-            // Optionally, deactivate other status filters when this is active
+
+            // Adjust category buttons based on toggle state
+            statusCategoryButtons.forEach(btn => btn.classList.remove('active')); // Deactivate all
+
             if (this.checked) {
-                // If "Само налични" is checked, ensure the "Налични" category button is active
-                statusCategoryButtons.forEach(btn => btn.classList.remove('active'));
+                // If "Само налични" is checked, make "Налични" button active
                 const availableButton = document.querySelector('.category-btn[data-status="AVAILABLE"]');
                 if (availableButton) {
                     availableButton.classList.add('active');
-                    currentFilterStatus = 'AVAILABLE'; // Update the status filter as well
+                    currentFilterStatus = 'AVAILABLE'; // Update the status filter
                 }
             } else {
-                // If "Само налични" is unchecked, reset to "Всички" category button
-                statusCategoryButtons.forEach(btn => btn.classList.remove('active'));
+                // If "Само налични" is unchecked, make "Всички" button active
                 const allButton = document.querySelector('.category-btn[data-status="ALL"]');
                 if (allButton) {
                     allButton.classList.add('active');
-                    currentFilterStatus = 'ALL'; // Update the status filter as well
+                    currentFilterStatus = 'ALL'; // Update the status filter
                 }
             }
             applyFilters();
         });
     }
 
-    // Initial render when the page loads
-    // 'allTables' is expected to be provided by Thymeleaf as a global JS variable
+    // Initial application of filters when the page loads
+    // This ensures that if allTables is populated and filters are set,
+    // the display updates correctly.
     if (typeof allTables !== 'undefined' && Array.isArray(allTables)) {
-        applyFilters();
-        // Set initial active filter button if any, default to 'ALL'
+        // Set initial active filter button, default to 'ALL'
         const initialActiveButton = document.querySelector('.category-btn[data-status="ALL"]');
         if (initialActiveButton) {
             initialActiveButton.classList.add('active');
         }
-        // If the "show available only" toggle is initially checked (e.g., from server-side state)
+
+        // Check if the 'showAvailableTablesToggle' is initially checked
+        // This might happen if its state is persisted (e.g., via a cookie or server-side).
         if (showAvailableTablesToggle && showAvailableTablesToggle.checked) {
-            // This will trigger the change event, so no explicit action needed here beyond setting checked state
-            // showAvailableTablesToggle.dispatchEvent(new Event('change')); // Can force the change event if needed
+            currentFilterShowAvailableOnly = true;
+            // Also ensure the 'AVAILABLE' category button is active if the toggle is on
+            statusCategoryButtons.forEach(btn => btn.classList.remove('active'));
+            const availableButton = document.querySelector('.category-btn[data-status="AVAILABLE"]');
+            if (availableButton) {
+                availableButton.classList.add('active');
+                currentFilterStatus = 'AVAILABLE';
+            }
         }
+
+        applyFilters(); // Apply filters based on initial state
     } else {
-        console.error("allTables data not found or is not an array. Tables cannot be rendered.");
-        noTablesMessage.style.display = 'block';
+        console.error("allTables data not found or is not an array. Filtering cannot be applied.");
+        // If no tables, and Thymeleaf already showed the message, JS doesn't need to change display.
+        // If Thymeleaf didn't show it but allTables is empty, then show it.
+        // This is covered by applyFilters anyway.
     }
 });

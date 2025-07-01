@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TableStatus {
 
-    AVAILABLE,
-    OCCUPIED,
-    RESERVED,
-    NEEDS_CLEANING
+    AVAILABLE("Налична"),
+    OCCUPIED("Заета"),
+    RESERVED("Резервирана"),
+    NEEDS_CLEANING("За почистване");
 
+    private final String displayName;
 }

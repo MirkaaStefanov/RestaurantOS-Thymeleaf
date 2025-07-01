@@ -25,12 +25,13 @@
     </div>
 
     <main class="dashboard-main">
-        <section class="menu-items-section"> <div class="section-header">
-            <h2>Маси</h2>
-            <button id="addNewTableBtn" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Добави нова маса
-            </button>
-        </div>
+        <section class="menu-items-section">
+            <div class="section-header">
+                <h2>Маси</h2>
+                <button id="addNewTableBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добави нова маса
+                </button>
+            </div>
 
             <div th:if="${successMessage}" class="flash-message success" th:text="${successMessage}"></div>
             <div th:if="${errorMessage}" class="flash-message error" th:text="${errorMessage}"></div>
@@ -42,20 +43,53 @@
                 </label>
 
                 <div class="category-filters">
-                    <button class="category-btn active" data-status="ALL">Всички</button> <button class="category-btn" data-status="AVAILABLE">Налични</button>
+                    <button class="category-btn active" data-status="ALL">Всички</button>
+                    <button class="category-btn" data-status="AVAILABLE">Налични</button>
                     <button class="category-btn" data-status="OCCUPIED">Заети</button>
                     <button class="category-btn" data-status="RESERVED">Резервирани</button>
                     <button class="category-btn" data-status="NEEDS_CLEANING">За почистване</button>
                 </div>
             </div>
 
-
             <div class="table-grid" id="tableGrid">
-                <div id="noTablesMessage" class="no-items-message" style="display: none; text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
-                    Няма намерени маси с текущите филтри.
-                </div>
+                <th:block th:if="${#lists.isEmpty(tables)}">
+                    <p id="noTablesMessage" class="no-items-message" style="text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
+                        Няма намерени маси с текущите филтри.
+                    </p>
+                </th:block>
+                <th:block th:unless="${#lists.isEmpty(tables)}">
+                    <div class="table-card" th:each="table : ${tables}"
+                         th:data-id="${table.id}"
+                         th:data-status="${table.status.name()}"
+                         th:data-available="${table.status.name() == 'AVAILABLE' ? 'true' : 'false'}">
+                        <div class="table-card-header">
+                            <h3 class="table-number">Маса №<span th:text="${table.number}"></span></h3>
+                            <span class="table-availability-status"
+                                  th:classappend="'status-' + ${table.status.name()}"
+                                  th:text="${table.status.displayName ?: table.status.name()}">Статус</span>
+                        </div>
+                        <div class="table-card-body">
+                            <p class="table-capacity">
+                                <i class="fas fa-users"></i> Капацитет: <span th:text="${table.capacity}"></span> места
+                            </p>
+                            <p class="table-status-info">
+                                Текущ статус: <span th:text="${table.status.displayName ?: table.status.name()}"></span>
+                            </p>
+                        </div>
+                        <div class="table-card-actions">
+                            <th:block th:if="${table.status.name() == 'AVAILABLE'}">
+                                <button type="button" class="btn btn-use" th:data-id="${table.id}" data-action="use">Използвай</button>
+                            </th:block>
+                            <button type="button" class="btn btn-edit" th:data-id="${table.id}" data-action="edit">Редактирай</button>
+                            <form th:action="@{/table/delete/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');">
+                                <button type="submit" class="btn btn-delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </th:block>
             </div>
-
         </section>
     </main>
 </div>
@@ -98,10 +132,12 @@
     </div>
 </div>
 
-<div id="modalOverlay" class="modal-overlay"></div> <script th:inline="javascript">
+<div id="modalOverlay" class="modal-overlay"></div>
+<script th:inline="javascript">
     // Make sure 'tables' from your controller is available here
-    var allTables = /*[[${tables}]]*/ [];
-    console.log("allTables data from Thymeleaf:", allTables); // Verify data is here
+    // This is still needed for populating the edit modal with data via JavaScript.
+    const allTables = [[${tables}]];
+    console.log("allTables data from Thymeleaf (for JS use):", allTables);
 </script>
 <script th:src="@{/js/table.js}"></script>
 <script th:src="@{/js/main.js}"></script>
