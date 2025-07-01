@@ -3,8 +3,10 @@ package com.example.RestaurantOS_Thymeleaf.clients;
 
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.AuthenticationRequest;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.AuthenticationResponse;
+import com.example.RestaurantOS_Thymeleaf.dtos.auth.PublicUserDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.RefreshTokenBodyDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.RegisterRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +20,7 @@ import java.io.IOException;
 public interface AuthenticationClient {
 
     @PostMapping("/register")
-    ResponseEntity<AuthenticationResponse>  register(@RequestBody RegisterRequest request);
+    ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request);
 
     @PostMapping("/authenticate")
     ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request);
@@ -28,5 +30,9 @@ public interface AuthenticationClient {
 
     @GetMapping("/logout")
     void logout(@RequestHeader("Authorization") String auth);
+
+//    @GetMapping("/me") // Retrieves current user information.
+//    AuthenticationResponse getMe(HttpServletRequest request);
+
 
 }

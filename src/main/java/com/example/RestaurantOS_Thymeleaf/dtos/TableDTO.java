@@ -1,5 +1,6 @@
 package com.example.RestaurantOS_Thymeleaf.dtos;
 
+import com.example.RestaurantOS_Thymeleaf.dtos.auth.PublicUserDTO;
 import com.example.RestaurantOS_Thymeleaf.enums.TableStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class TableDTO {
     private int number;
     private int capacity;
     private TableStatus status;
-    private Long currentOrder;
-    private UUID waiter;
+    private OrderDTO currentOrder;
+    private PublicUserDTO waiter;
 
 }

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление на Маси</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="icon" type="image/x-x-icon" th:href="@{/img/photos/noImage.png}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content">
+
+    <div class="mobile-header">
+        <button class="hamburger-menu" id="hamburgerBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="mobile-header-logo">
+            <span class="logo-hm">OS</span><span class="logo-rp">Restaurant</span>
+        </div>
+    </div>
+
+    <main class="dashboard-main">
+        <section class="menu-items-section"> <div class="section-header">
+            <h2>Маси</h2>
+            <button id="addNewTableBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Добави нова маса
+            </button>
+        </div>
+
+            <div th:if="${successMessage}" class="flash-message success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="flash-message error" th:text="${errorMessage}"></div>
+
+            <div class="filter-controls">
+                <label class="category-btn ml-auto d-flex align-items-center" style="cursor: pointer;">
+                    <input type="checkbox" id="showAvailableTables" class="form-check-input" data-filter-type="availability">
+                    <span class="ml-2">Само налични</span>
+                </label>
+
+                <div class="category-filters">
+                    <button class="category-btn active" data-status="ALL">Всички</button> <button class="category-btn" data-status="AVAILABLE">Налични</button>
+                    <button class="category-btn" data-status="OCCUPIED">Заети</button>
+                    <button class="category-btn" data-status="RESERVED">Резервирани</button>
+                    <button class="category-btn" data-status="NEEDS_CLEANING">За почистване</button>
+                </div>
+            </div>
+
+
+            <div class="table-grid" id="tableGrid">
+                <div id="noTablesMessage" class="no-items-message" style="display: none; text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
+                    Няма намерени маси с текущите филтри.
+                </div>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<div id="tableModalOverlay" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="modalTitle" class="modal-title">Добавяне на нова маса</h2>
+            <button class="modal-close-btn" id="closeTableModalBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="tableForm" class="styled-form" method="post">
+                <input type="hidden" id="tableId" name="id">
+
+                <div class="form-group">
+                    <label for="tableNumber" class="form-label">Номер на маса</label>
+                    <input type="number" id="tableNumber" name="number" class="form-control" placeholder="Въведете номер на маса" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="tableCapacity" class="form-label">Капацитет (места)</label>
+                    <input type="number" id="tableCapacity" name="capacity" class="form-control" placeholder="Въведете капацитет" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="tableStatus" class="form-label">Статус</label>
+                    <select id="tableStatus" name="status" class="form-control">
+                        <option value="AVAILABLE">Налична</option>
+                        <option value="OCCUPIED">Заета</option>
+                        <option value="RESERVED">Резервирана</option>
+                        <option value="NEEDS_CLEANING">За почистване</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" id="cancelTableModalBtn">Откажи</button>
+            <button type="submit" class="btn-primary-action" id="saveTableBtn" form="tableForm">Създай маса</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay"></div> <script th:inline="javascript">
+    // Make sure 'tables' from your controller is available here
+    var allTables = /*[[${tables}]]*/ [];
+    console.log("allTables data from Thymeleaf:", allTables); // Verify data is here
+</script>
+<script th:src="@{/js/table.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
