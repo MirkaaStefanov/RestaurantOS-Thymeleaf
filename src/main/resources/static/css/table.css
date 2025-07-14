@@ -1,0 +1,174 @@
+/* --- Table Specific Styles --- */
+
+/* Reusing .menu-item-grid for table layout */
+.table-grid-container .menu-item-grid {
+    /* No specific changes needed here if it's already working from menu-item.css */
+}
+
+/* Overriding .menu-item-card for table specific design */
+.table-card.menu-item-card { /* Use both classes for specificity and clarity */
+    width: 250px;
+    height: 250px; /* Adjusted height for tables - smaller than menu items */
+    /* Ensure no padding is pushing content too much from the sides if you had any */
+}
+
+.table-card.menu-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Specific content adjustments within the reused menu-item-content structure */
+.table-card .menu-item-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center; /* Center content vertically */
+    align-items: center;   /* Center content horizontally */
+    text-align: center;    /* Ensure text within is centered */
+    padding: 15px; /* Ensure consistent padding as per menu-item-card */
+}
+
+.table-card .product-image {
+    display: none; /* Tables don't have images */
+}
+
+.table-card .name-availability-row {
+    flex-direction: column; /* Stack table number and status vertically */
+    margin-bottom: 10px; /* Reduced margin slightly to free up space */
+    align-items: center; /* Center items within this row */
+    width: 100%;
+}
+
+.table-card .menu-item-name { /* Table number styling */
+    font-size: 40px; /* Slightly reduced font size to prevent overflow */
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+    white-space: nowrap; /* Keep on one line */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: unset;
+    max-width: 100%; /* Ensure it respects parent width */
+    display: block; /* Important for width and text-overflow */
+}
+
+.table-card .menu-item-availability { /* Table Status Tag */
+    font-size: 15px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    display: inline-block;
+    margin: 0 auto; /* Center the status tag */
+}
+
+/* Specific Status Colors & Card Borders (for tables) */
+.table-card.status-AVAILABLE {
+    border: 2px solid #28a745; /* Green border */
+}
+.table-card .status-AVAILABLE {
+    color: #28a745;
+    background-color: #e6ffed;
+}
+
+.table-card.status-OCCUPIED {
+    border: 2px solid #dc3545; /* Red border */
+}
+.table-card .status-OCCUPIED {
+    color: #dc3545;
+    background-color: #ffe6e6;
+}
+
+.table-card.status-RESERVED {
+    border: 2px solid #007bff; /* Blue border */
+}
+.table-card .status-RESERVED {
+    color: #007bff;
+    background-color: #e0f2f7;
+}
+
+.table-card.status-NEEDS_CLEANING {
+    border: 2px solid #ffc107; /* Yellow/Orange border */
+}
+.table-card .status-NEEDS_CLEANING {
+    color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.table-card .menu-item-category {
+    display: none; /* Tables don't have categories in this context */
+}
+
+.table-card .menu-item-description { /* Capacity text for tables */
+    font-size: 16px;
+    color: #666;
+    line-height: 1.4;
+    height: auto;
+    margin-bottom: 15px;
+    -webkit-line-clamp: unset;
+}
+
+.table-card .menu-item-details {
+    display: none; /* Hide price/prep time as it's not relevant for tables */
+}
+
+.table-card .menu-item-actions { /* Buttons at the bottom of table card */
+    justify-content: center; /* Center buttons horizontally */
+    margin-top: auto;
+    border-top: none;
+    padding-top: 0;
+    display: flex; /* Ensure flex for centering */
+    gap: 8px; /* Consistent gap between buttons */
+}
+
+/* Button specific styles for "Use" button on tables */
+.table-card .btn-use {
+    background-color: #28a745; /* Green for "Use" */
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 14px;
+    /* Ensure it doesn't take full width if that's not desired */
+}
+.table-card .btn-use:hover {
+    background-color: #218838;
+}
+
+/* Ensure general .btn styles from menu-item.css are used for edit/delete */
+.table-card .btn {
+    padding: 7px 12px; /* Consistent with menu-item.css .btn */
+    font-size: 13px; /* Consistent with menu-item.css .btn */
+    border-radius: 6px;
+}
+
+/* --- Responsive Adjustments (Table Specific) --- */
+@media (max-width: 992px) {
+    .table-card.menu-item-card {
+        width: 200px;
+        height: 220px;
+    }
+    .table-card .menu-item-name {
+        font-size: 36px; /* Further reduce on smaller screens if needed */
+    }
+    .table-card .menu-item-availability {
+        font-size: 14px;
+        padding: 4px 10px;
+    }
+    .table-card .menu-item-description {
+        font-size: 14px;
+    }
+    .table-card .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-card.menu-item-card {
+        width: 90%;
+        max-width: 300px;
+        height: auto;
+        margin: 0 auto 20px auto;
+    }
+    .table-card .menu-item-name {
+        font-size: 48px; /* Revert to large size for single column on mobile */
+    }
+}

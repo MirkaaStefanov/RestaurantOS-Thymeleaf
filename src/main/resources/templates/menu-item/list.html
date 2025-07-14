@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление на менюто</title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">        <link rel="stylesheet" th:href="@{/css/menu-item.css}">  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </head>
 <body>
 
@@ -21,10 +19,9 @@
     </div>
 </div>
 
-
 <div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
 
-<div class="main-content">
+<div class="main-content menu-item-grid-container">
     <div class="page-header">
         <h1>Управление на менюто</h1>
         <button class="btn-add-item" id="addNewItemBtn">
@@ -51,7 +48,6 @@
             <span class="ml-2">Само налични</span>
         </label>
     </div>
-
 
     <div class="menu-item-grid" id="menuItemGrid">
         <th:block th:if="${#lists.isEmpty(allMenuItems)}">
@@ -114,11 +110,12 @@
         </div>
         <div class="modal-body">
             <form id="menuItemForm" method="post" enctype="multipart/form-data" th:action="@{/menu-item}">
-                <input type="hidden" id="menuItemId" name="id"> <div class="form-group">
-                <label for="itemName" class="form-label">Име*</label>
-                <input type="text" id="itemName" name="name" class="form-control" placeholder="напр., Вкусно суфле"
-                       required>
-            </div>
+                <input type="hidden" id="menuItemId" name="id">
+                <div class="form-group">
+                    <label for="itemName" class="form-label">Име*</label>
+                    <input type="text" id="itemName" name="name" class="form-control" placeholder="напр., Вкусно суфле"
+                           required>
+                </div>
 
                 <div class="form-group">
                     <label for="itemDescription" class="form-label">Описание</label>

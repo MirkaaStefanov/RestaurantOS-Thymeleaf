@@ -1,145 +1,142 @@
 <!DOCTYPE html>
-<html lang="bg" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление на Маси</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-    <link rel="icon" type="image/x-x-icon" th:href="@{/img/photos/noImage.png}">
+    <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/menu-item.css">
+    <link rel="stylesheet" href="css/table.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
-
-<div class="main-content">
-
-    <div class="mobile-header">
-        <button class="hamburger-menu" id="hamburgerBtn">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="mobile-header-logo">
-            <span class="logo-hm">OS</span><span class="logo-rp">Restaurant</span>
-        </div>
+<div class="mobile-header">
+    <button class="hamburger-menu" id="hamburgerBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="mobile-header-logo">
+        <span class="logo-hm">OS</span><span class="logo-rp">Restaurant</span>
     </div>
-
-    <main class="dashboard-main">
-        <section class="menu-items-section">
-            <div class="section-header">
-                <h2>Маси</h2>
-                <button id="addNewTableBtn" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Добави нова маса
-                </button>
-            </div>
-
-            <div th:if="${successMessage}" class="flash-message success" th:text="${successMessage}"></div>
-            <div th:if="${errorMessage}" class="flash-message error" th:text="${errorMessage}"></div>
-
-            <div class="filter-controls">
-                <label class="category-btn ml-auto d-flex align-items-center" style="cursor: pointer;">
-                    <input type="checkbox" id="showAvailableTables" class="form-check-input" data-filter-type="availability">
-                    <span class="ml-2">Само налични</span>
-                </label>
-
-                <div class="category-filters">
-                    <button class="category-btn active" data-status="ALL">Всички</button>
-                    <button class="category-btn" data-status="AVAILABLE">Налични</button>
-                    <button class="category-btn" data-status="OCCUPIED">Заети</button>
-                    <button class="category-btn" data-status="RESERVED">Резервирани</button>
-                    <button class="category-btn" data-status="NEEDS_CLEANING">За почистване</button>
-                </div>
-            </div>
-
-            <div class="table-grid" id="tableGrid">
-                <th:block th:if="${#lists.isEmpty(tables)}">
-                    <p id="noTablesMessage" class="no-items-message" style="text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
-                        Няма намерени маси с текущите филтри.
-                    </p>
-                </th:block>
-                <th:block th:unless="${#lists.isEmpty(tables)}">
-                    <div class="table-card" th:each="table : ${tables}"
-                         th:data-id="${table.id}"
-                         th:data-status="${table.status.name()}"
-                         th:data-available="${table.status.name() == 'AVAILABLE' ? 'true' : 'false'}">
-                        <div class="table-card-header">
-                            <h3 class="table-number">Маса №<span th:text="${table.number}"></span></h3>
-                            <span class="table-availability-status"
-                                  th:classappend="'status-' + ${table.status.name()}"
-                                  th:text="${table.status.displayName ?: table.status.name()}">Статус</span>
-                        </div>
-                        <div class="table-card-body">
-                            <p class="table-capacity">
-                                <i class="fas fa-users"></i> Капацитет: <span th:text="${table.capacity}"></span> места
-                            </p>
-                            <p class="table-status-info">
-                                Текущ статус: <span th:text="${table.status.displayName ?: table.status.name()}"></span>
-                            </p>
-                        </div>
-                        <div class="table-card-actions">
-                            <th:block th:if="${table.status.name() == 'AVAILABLE'}">
-                                <button type="button" class="btn btn-use" th:data-id="${table.id}" data-action="use">Използвай</button>
-                            </th:block>
-                            <button type="button" class="btn btn-edit" th:data-id="${table.id}" data-action="edit">Редактирай</button>
-                            <form th:action="@{/table/delete/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');">
-                                <button type="submit" class="btn btn-delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </th:block>
-            </div>
-        </section>
-    </main>
 </div>
 
-<div id="tableModalOverlay" class="modal-overlay">
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content table-grid-container menu-item-grid-container">
+    <div class="page-header">
+        <h1>Управление на Маси</h1>
+        <button class="btn-add-item" id="addNewTableBtn">
+            <i class="fas fa-plus"></i> Добави нова маса
+        </button>
+    </div>
+
+    <div th:if="${successMessage}" class="form-alert alert-success">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" class="form-alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <div class="category-filter-buttons">
+        <button type="button" class="category-btn active" data-status="ALL">Всички</button>
+        <button type="button" class="category-btn" data-status="AVAILABLE">Налични</button>
+        <button type="button" class="category-btn" data-status="OCCUPIED">Заети</button>
+        <button type="button" class="category-btn" data-status="RESERVED">Резервирани</button>
+        <button type="button" class="category-btn" data-status="NEEDS_CLEANING">За почистване</button>
+
+    </div>
+
+    <div class="menu-item-grid" id="tableGrid"> <th:block th:if="${#lists.isEmpty(tables)}">
+        <p id="noTablesMessage" style="text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
+            Няма намерени маси за показване.
+        </p>
+    </th:block>
+        <th:block th:unless="${#lists.isEmpty(tables)}">
+            <div class="menu-item-card table-card" th:each="table : ${tables}" th:data-id="${table.id}"
+                 th:data-status="${table.status.name()}"
+                 th:data-available="${table.status.name() == 'AVAILABLE' ? 'true' : 'false'}">
+
+                <div class="menu-item-content">
+                    <div class="name-availability-row">
+                        <h3 class="menu-item-name">Маса №<span th:text="${table.number}"></span></h3>
+                        <span class="menu-item-availability"
+                              th:classappend="'status-' + ${table.status.name()}"
+                              th:text="${table.status.displayName}">Статус</span>
+                    </div>
+
+                    <p class="menu-item-description">
+                        Капацитет: <span th:text="${table.capacity}"></span> места
+                    </p>
+
+                    <div class="menu-item-actions">
+                        <th:block th:if="${table.status.name() == 'AVAILABLE'}">
+                            <button type="button" class="btn btn-toggle-availability btn-use" th:data-id="${table.id}">Използвай</button>
+                        </th:block>
+                        <button type="button" class="btn btn-edit" th:data-id="${table.id}">Редактирай</button>
+                        <form th:action="@{/table/delete/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');">
+                            <button type="submit" class="btn btn-delete">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<div class="modal-overlay" id="tableModal">
     <div class="modal-container">
         <div class="modal-header">
-            <h2 id="modalTitle" class="modal-title">Добавяне на нова маса</h2>
+            <h2 class="modal-title" id="modalTitle">Добавяне на нова маса</h2>
             <button class="modal-close-btn" id="closeTableModalBtn"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
-            <form id="tableForm" class="styled-form" method="post">
+            <form id="tableForm" method="post" th:action="@{/table}">
                 <input type="hidden" id="tableId" name="id">
 
                 <div class="form-group">
-                    <label for="tableNumber" class="form-label">Номер на маса</label>
-                    <input type="number" id="tableNumber" name="number" class="form-control" placeholder="Въведете номер на маса" required min="1">
+                    <label for="tableNumber" class="form-label">Номер на маса*</label>
+                    <input type="number" id="tableNumber" name="number" class="form-control" placeholder="напр., 5" required min="1">
                 </div>
 
                 <div class="form-group">
-                    <label for="tableCapacity" class="form-label">Капацитет (места)</label>
-                    <input type="number" id="tableCapacity" name="capacity" class="form-control" placeholder="Въведете капацитет" required min="1">
+                    <label for="tableCapacity" class="form-label">Капацитет*</label>
+                    <input type="number" id="tableCapacity" name="capacity" class="form-control" placeholder="напр., 4" required min="1">
                 </div>
 
                 <div class="form-group">
-                    <label for="tableStatus" class="form-label">Статус</label>
-                    <select id="tableStatus" name="status" class="form-control">
+                    <label for="tableStatus" class="form-label">Статус*</label>
+                    <select id="tableStatus" name="status" class="form-control" required>
                         <option value="AVAILABLE">Налична</option>
                         <option value="OCCUPIED">Заета</option>
                         <option value="RESERVED">Резервирана</option>
                         <option value="NEEDS_CLEANING">За почистване</option>
                     </select>
                 </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelTableModalBtn">Отказ</button>
+                    <button type="submit" class="btn-primary-action" id="saveTableBtn">Създай маса</button>
+                </div>
             </form>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-cancel" id="cancelTableModalBtn">Откажи</button>
-            <button type="submit" class="btn-primary-action" id="saveTableBtn" form="tableForm">Създай маса</button>
         </div>
     </div>
 </div>
 
-<div id="modalOverlay" class="modal-overlay"></div>
-<script th:inline="javascript">
-    // Make sure 'tables' from your controller is available here
-    // This is still needed for populating the edit modal with data via JavaScript.
-    const allTables = [[${tables}]];
-    console.log("allTables data from Thymeleaf (for JS use):", allTables);
-</script>
-<script th:src="@{/js/table.js}"></script>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/table.js}"></script>
+<script th:inline="javascript">
+    /* Data from backend for client-side operations */
+    const allTables = [[${tables}]];
+
+    // Log for debugging
+    console.log("All Tables from backend:", allTables);
+</script>
+
 </body>
 </html>

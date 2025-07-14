@@ -1,0 +1,836 @@
+/* Basic Reset & Font Setup */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f0f2f5; /* Light gray background */
+    display: flex; /* Use flexbox for sidebar and main content layout */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* --- Mobile Header --- */
+.mobile-header {
+    display: none; /* Hidden by default for desktop */
+    background-color: #ffffff;
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    z-index: 1000; /* Ensure it's above other content */
+    position: sticky; /* Make it stick to the top on scroll */
+    top: 0;
+}
+
+.hamburger-menu {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    padding: 5px;
+    display: flex; /* Center the icon */
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-header-logo {
+    display: flex;
+    align-items: center;
+}
+
+.mobile-header-logo .logo-hm {
+    background-color: #ffc107;
+    color: #333;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    font-weight: 700;
+}
+
+.mobile-header-logo .logo-rp {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    white-space: nowrap;
+}
+
+/* --- Sidebar Styling --- */
+.sidebar {
+    width: 250px;
+    background-color: #ffffff; /* White background for sidebar */
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease, transform 0.3s ease, left 0.3s ease; /* Added left for mobile */
+    flex-shrink: 0;
+    position: relative; /* Default for desktop layout */
+    z-index: 1000;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+/* Sidebar Header (Logo/Title) */
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.sidebar-header .nav-logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-header .nav-logo .logo-rp {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar.collapsed .sidebar-header .nav-logo .logo-hm {
+    margin-right: 0;
+}
+
+.logo-hm {
+    background-color: #ffc107; /* Yellow/orange accent */
+    color: #333;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-grow: 1;
+}
+
+.sidebar-menu-item {
+    margin-bottom: 5px;
+}
+
+.sidebar-menu-item .sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #555;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    margin: 0 10px;
+    transition: background-color 0.3s ease, color 0.3s ease, padding 0.3s ease;
+}
+
+.sidebar-menu-item .sidebar-link:hover {
+    background-color: #f0f2f5;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.sidebar-menu-item .sidebar-link.active {
+    background-color: #e0f2f7;
+    color: #007bff;
+    font-weight: 600;
+}
+
+.sidebar-link i {
+    margin-right: 15px;
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+    transition: margin-right 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-link i {
+    margin-right: 0;
+}
+
+.sidebar-link span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease, width 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-link span {
+    opacity: 0;
+    width: 0;
+    padding-left: 0;
+}
+
+/* User Profile/Logout Section at the bottom of the sidebar */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px 10px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #ccc;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    transition: width 0.3s ease, height 0.3s ease, margin-bottom 0.3s ease;
+}
+
+.sidebar.collapsed .user-avatar {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 0;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease;
+}
+
+.user-role {
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .user-role {
+    opacity: 0;
+    width: 0;
+}
+
+.sidebar-footer .logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f8f8;
+    color: #dc3545;
+    padding: 10px 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+    width: calc(100% - 20px);
+    margin: 0 10px;
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.logout-btn i {
+    margin-right: 10px;
+    transition: margin-right 0.3s ease;
+}
+
+.sidebar.collapsed .logout-btn {
+    width: 50px;
+    padding: 10px;
+}
+
+.sidebar.collapsed .logout-btn span {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.logout-btn:hover {
+    background-color: #fcebeb;
+    color: #c82333;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+/* Sidebar Toggle Button (for desktop collapse, comes from your fragment) */
+.sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    right: -15px;
+    background-color: #007bff;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 1001;
+}
+
+.sidebar-toggle:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.sidebar-toggle i {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+}
+
+/* --- Main Content Area (shared properties) --- */
+.main-content {
+    flex-grow: 1; /* Takes remaining space */
+    padding: 30px;
+    background-color: #f0f2f5; /* Match body background */
+    margin: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center items horizontally within main-content */
+}
+
+/* Shared Flash Messages (alerts) */
+.form-alert {
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    font-size: 15px;
+    text-align: left;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    width: 100%; /* Ensure alerts span full width within main-content's padding */
+    max-width: 1200px; /* Limit alerts width on very large screens */
+}
+
+.alert-success {
+    background-color: #e6ffed;
+    color: #28a745;
+    border: 1px solid #a3e6b2;
+}
+
+.alert-danger {
+    background-color: #ffe6e6;
+    color: #dc3545;
+    border: 1px solid #ffb3b3;
+}
+
+/* --- Modals (shared styles) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* Ensure it's above everything */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    width: 90%;
+    max-width: 500px; /* Adjusted max-width for forms */
+    transform: translateY(-50px); /* Start slightly above center */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    display: flex;
+    flex-direction: column; /* Stack header, body, footer */
+    max-height: 90vh; /* Ensure modal itself doesn't overflow viewport */
+}
+
+.modal-overlay.active .modal-container {
+    transform: translateY(0); /* Slide into view */
+    opacity: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #777;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    color: #333;
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto; /* Enable scrolling for long forms */
+    flex-grow: 1; /* Allow body to expand */
+}
+
+/* Form Grouping within modal */
+.form-group {
+    margin-bottom: 20px; /* Space between form fields */
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-top: 15px; /* Spacing for checkbox */
+}
+
+.form-check-input {
+    margin-right: 10px;
+    transform: scale(1.1); /* Slightly larger checkbox */
+    accent-color: #007bff;
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+}
+
+.row {
+    display: flex;
+    gap: 20px;
+}
+
+.col-md-6 {
+    flex: 1; /* Take equal width */
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 25px;
+    border-top: 1px solid #eee;
+    gap: 10px;
+}
+
+.btn-cancel {
+    background-color: #e9ecef;
+    color: #555;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+}
+
+.btn-primary-action {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary-action:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* --- LOGIN / REGISTER FORM STYLES (If these are separate pages, they might go into their own CSS file like 'auth.css') --- */
+.form-page-wrapper {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.form-page-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    box-sizing: border-box;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.form-page-title {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+/* --- General Form Styling (used by login/register and also the modal form) --- */
+.styled-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* .form-group and .form-label/.form-control are already defined above for modals, keep here if also applies to non-modal forms */
+
+.btn-form-submit {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.btn-form-submit:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.form-link-group {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #777;
+    text-align: center;
+}
+
+.form-link {
+    color: #007bff;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.form-link:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.form-text-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: #aaa;
+    font-size: 14px;
+}
+
+.form-text-divider::before,
+.form-text-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #eee;
+}
+
+.form-text-divider:not(:empty)::before {
+    margin-right: .25em;
+}
+
+.form-text-divider:not(:empty)::after {
+    margin-left: .25em;
+}
+
+/* --- Google Button --- */
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    color: #4285f4;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: 500;
+}
+
+.btn-google img {
+    margin-right: 10px;
+}
+
+.btn-google:hover {
+    background-color: #f8f8f8;
+    border-color: #cdd;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+}
+
+/* --- Register Link Group --- */
+.register-link-group {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-form-secondary {
+    background-color: #e9ecef;
+    color: #333;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 500;
+}
+
+.btn-form-secondary:hover {
+    background-color: #dee2e6;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 1050; /* Above main content, below sidebar */
+    display: none; /* Hidden by default */
+}
+
+/* Responsive Adjustments (Global or Page-Specific?) */
+@media (max-width: 992px) { /* Adjust sidebar for tablets */
+    .sidebar {
+        width: 200px;
+        padding: 15px;
+    }
+    /* No change to sidebar-title here, as it's hidden on mobile */
+    .sidebar-link {
+        font-size: 1em;
+        padding: 10px 12px;
+    }
+    .sidebar-link i {
+        font-size: 1.1em;
+    }
+    .main-content {
+        padding: 15px 20px;
+        margin: 15px;
+    }
+    .page-header h1 {
+        font-size: 1.8em;
+    }
+    .btn-add-item {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    .modal-container {
+        max-width: 450px;
+    }
+}
+
+@media (max-width: 768px) { /* Adjust for mobile phones */
+    body {
+        display: block;
+        overflow-x: hidden;
+    }
+
+    .mobile-header {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        height: 100vh;
+        width: 250px;
+        padding: 20px 0;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        z-index: 1100;
+        transition: left 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar-toggle {
+        display: none;
+    }
+
+    .sidebar-header {
+        display: none;
+    }
+
+    .sidebar-menu {
+        flex-grow: 1;
+    }
+
+    .sidebar-footer {
+        flex-shrink: 0;
+        padding-top: 15px;
+        padding-bottom: 20px;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .main-content {
+        margin-top: 0;
+        padding-top: 15px;
+        margin: 0;
+        width: 100%;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .page-header h1 {
+        width: 100%;
+        text-align: center;
+    }
+    .btn-add-item {
+        width: 100%;
+        justify-content: center;
+    }
+    .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .modal-container {
+        width: 95%;
+        max-width: none;
+    }
+    .modal-header {
+        padding: 15px 20px;
+    }
+    .modal-title {
+        font-size: 20px;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-footer {
+        padding: 15px 20px;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 10px;
+        margin: 5px;
+    }
+    .page-header h1 {
+        font-size: 1.5em;
+    }
+    .btn-add-item {
+        font-size: 0.9em;
+        padding: 10px 15px;
+    }
+    .mobile-header-logo .logo-rp {
+        font-size: 16px;
+    }
+}
