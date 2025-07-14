@@ -27,7 +27,7 @@
 <div class="main-content table-grid-container menu-item-grid-container">
     <div class="page-header">
         <h1>Управление на Маси</h1>
-        <button class="btn-add-item" id="addNewTableBtn">
+        <button class="btn-add-item" id="addNewTableBtn" th:if="${session.sessionToken != null and session.sessionRole == 'ADMIN'}">
             <i class="fas fa-plus"></i> Добави нова маса
         </button>
     </div>
@@ -45,14 +45,14 @@
         <button type="button" class="category-btn" data-status="OCCUPIED">Заети</button>
         <button type="button" class="category-btn" data-status="RESERVED">Резервирани</button>
         <button type="button" class="category-btn" data-status="NEEDS_CLEANING">За почистване</button>
-
     </div>
 
-    <div class="menu-item-grid" id="tableGrid"> <th:block th:if="${#lists.isEmpty(tables)}">
-        <p id="noTablesMessage" style="text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
-            Няма намерени маси за показване.
-        </p>
-    </th:block>
+    <div class="menu-item-grid" id="tableGrid">
+        <th:block th:if="${#lists.isEmpty(tables)}">
+            <p id="noTablesMessage" style="text-align: center; color: #777; font-size: 1.1em; margin-top: 50px; width: 100%;">
+                Няма намерени маси за показване.
+            </p>
+        </th:block>
         <th:block th:unless="${#lists.isEmpty(tables)}">
             <div class="menu-item-card table-card" th:each="table : ${tables}" th:data-id="${table.id}"
                  th:data-status="${table.status.name()}"
@@ -71,11 +71,18 @@
                     </p>
 
                     <div class="menu-item-actions">
-                        <th:block th:if="${table.status.name() == 'AVAILABLE'}">
+                        <th:block th:if="${session.sessionToken != null and session.sessionRole == 'WAITER' and table.status.name() == 'AVAILABLE'}">
                             <button type="button" class="btn btn-toggle-availability btn-use" th:data-id="${table.id}">Използвай</button>
                         </th:block>
-                        <button type="button" class="btn btn-edit" th:data-id="${table.id}">Редактирай</button>
-                        <form th:action="@{/table/delete/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');">
+                        <th:block th:if="${session.sessionToken != null and session.sessionRole == 'WAITER' and table.status.name() == 'OCCUPIED'}">
+                            <form th:action="@{/order/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');" >
+                                <button type="submit" class="btn btn-edit">
+                                    <i>Поръчка</i>
+                                </button>
+                            </form>
+                        </th:block>
+                        <button type="button" class="btn btn-edit" th:data-id="${table.id}" th:if="${session.sessionToken != null and session.sessionRole == 'ADMIN'}">Редактирай</button>
+                        <form th:action="@{/table/delete/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');" th:if="${session.sessionToken != null and session.sessionRole == 'ADMIN'}">
                             <button type="submit" class="btn btn-delete">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
