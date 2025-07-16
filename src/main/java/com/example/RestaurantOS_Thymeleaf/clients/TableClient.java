@@ -39,5 +39,7 @@ public interface TableClient {
     @PostMapping("/use/{id}")
     OrderDTO use(@PathVariable UUID id, @RequestHeader(value = "Authorization", required = false) String auth);
 
+    @GetMapping("/order/{id}")
+    OrderDTO getOrderForTable(@PathVariable UUID id, @RequestHeader(value = "Authorization", required = false) String auth);
 
 }

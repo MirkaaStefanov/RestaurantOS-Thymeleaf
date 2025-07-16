@@ -4,14 +4,17 @@ import com.example.RestaurantOS_Thymeleaf.clients.AuthenticationClient;
 import com.example.RestaurantOS_Thymeleaf.clients.TableClient;
 import com.example.RestaurantOS_Thymeleaf.clients.UserClient;
 import com.example.RestaurantOS_Thymeleaf.dtos.MenuItemDTO;
+import com.example.RestaurantOS_Thymeleaf.dtos.OrderDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.TableDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.AuthenticationResponse;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.PublicUserDTO;
 import com.example.RestaurantOS_Thymeleaf.enums.MenuCategory;
 import com.example.RestaurantOS_Thymeleaf.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,11 +48,13 @@ public class TableController {
         List<TableDTO> tables = new ArrayList<>();
         PublicUserDTO user = userClient.getMe(token);
 
-        if (user.getRole().equals(Role.ADMIN)) {
-            tables = tableClient.getAll(token);
-        }else if(user.getRole().equals(Role.WAITER)){
-            tables = tableClient.findForWaiter(token);
+        tables = tableClient.getAll(token);
+
+        if (user.getRole().equals(Role.WAITER)) {
+            List<TableDTO> forWaiter = tableClient.findForWaiter(token);
+            model.addAttribute("waiterTables", forWaiter);
         }
+
 
         model.addAttribute("tables", tables);
 
@@ -57,7 +62,7 @@ public class TableController {
         model.addAttribute("createDTO", new TableDTO());
         model.addAttribute("updateDTO", new TableDTO());
 
-        log.info("Loaded total menu items: {}", tables.size());
+        log.info("Loaded total tables: {}", tables.size());
         return "table/list";
     }
 
@@ -114,13 +119,23 @@ public class TableController {
     @PostMapping("/use/{id}")
     public String useTable(@PathVariable UUID id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         String token = (String) request.getSession().getAttribute("sessionToken");
+        OrderDTO order = new OrderDTO();
         try {
-            tableClient.use(id, token);
+            order = tableClient.use(id, token);
             redirectAttributes.addFlashAttribute("successMessage", "Table got activated!");
         } catch (Exception e) {
             log.error("Error in table getting used {}: {}", id, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to toggle availability: " + e.getMessage());
         }
-        return "redirect:/table";
+        return "redirect:/table/order/" +order.getTable();
+    }
+
+    @GetMapping("/order/{id}")
+    public String orderForTable(@PathVariable UUID id, HttpServletRequest request, Model model) {
+        String token = (String) request.getSession().getAttribute("sessionToken");
+        OrderDTO orderDTO = tableClient.getOrderForTable(id, token);
+        model.addAttribute("order", orderDTO);
+        return "table/orders";
+
     }
 }
