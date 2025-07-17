@@ -1,6 +1,7 @@
 package com.example.RestaurantOS_Thymeleaf.controllers;
 
 import com.example.RestaurantOS_Thymeleaf.clients.AuthenticationClient;
+import com.example.RestaurantOS_Thymeleaf.clients.MenuItemClient;
 import com.example.RestaurantOS_Thymeleaf.clients.TableClient;
 import com.example.RestaurantOS_Thymeleaf.clients.UserClient;
 import com.example.RestaurantOS_Thymeleaf.dtos.MenuItemDTO;
@@ -40,6 +41,7 @@ public class TableController {
 
     private final TableClient tableClient;
     private final UserClient userClient;
+    private final MenuItemClient menuItemClient;
 
     @GetMapping
     public String getTables(Model model, HttpServletRequest request) {
@@ -127,14 +129,19 @@ public class TableController {
             log.error("Error in table getting used {}: {}", id, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to toggle availability: " + e.getMessage());
         }
-        return "redirect:/table/order/" +order.getTable();
+        return "redirect:/table";
     }
 
     @GetMapping("/order/{id}")
     public String orderForTable(@PathVariable UUID id, HttpServletRequest request, Model model) {
         String token = (String) request.getSession().getAttribute("sessionToken");
         OrderDTO orderDTO = tableClient.getOrderForTable(id, token);
+        List<MenuItemDTO> allMenuItems = menuItemClient.getAllMenuItems(true,null, token);
         model.addAttribute("order", orderDTO);
+        model.addAttribute("allMenuItems", allMenuItems);
+        model.addAttribute("orderId", orderDTO.getId());
+        model.addAttribute("menuCategoryEnumValues", MenuCategory.values());
+        System.out.println("menu items: "+allMenuItems.size());
         return "table/orders";
 
     }

@@ -72,10 +72,14 @@
 
                     <div class="menu-item-actions">
                         <th:block th:if="${session.sessionToken != null and session.sessionRole == 'WAITER' and table.status.name() == 'AVAILABLE'}">
-                            <button type="button" class="btn btn-toggle-availability btn-use" th:data-id="${table.id}">Използвай</button>
+                            <form th:action="@{/table/use/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да използвате тази маса?');" >
+                                <button type="submit" class="btn btn-toggle-availability btn-use">
+                                    <i>Използвай</i>
+                                </button>
+                            </form>
                         </th:block>
                         <th:block th:if="${session.sessionToken != null and session.sessionRole == 'WAITER' and table.status.name() == 'OCCUPIED'}">
-                            <form th:action="@{/order/{id}(id=${table.id})}" method="post" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');" >
+                            <form th:action="@{/table/order/{id}(id=${table.id})}" method="get" onsubmit="return confirm('Сигурни ли сте, че искате да изтриете тази маса?');" >
                                 <button type="submit" class="btn btn-edit">
                                     <i>Поръчка</i>
                                 </button>

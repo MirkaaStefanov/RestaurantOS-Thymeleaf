@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const tableId = button.dataset.id; // Get ID directly as a string
 
             if (button.classList.contains('btn-use')) {
-                alert(`Използвай маса №${tableId} (ID: ${tableId}).\nПренасочване към страница за поръчки...`);
+//                alert(`Използвай маса №${tableId} (ID: ${tableId}).\nПренасочване към страница за поръчки...`);
                 // Example: window.location.href = `/orders?tableId=${tableId}`;
             } else if (button.classList.contains('btn-edit')) {
                 console.log('--- Edit button clicked ---');

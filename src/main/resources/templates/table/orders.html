@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поръчка за Маса №<span th:text="${order.table.number}"></span></title>
+    <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
+
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/menu-item.css}">
+    <link rel="stylesheet" th:href="@{/css/table.css}">
+    <link rel="stylesheet" th:href="@{/css/order.css}"> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="mobile-header">
+    <button class="hamburger-menu" id="hamburgerBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="mobile-header-logo">
+        <span class="logo-hm">OS</span><span class="logo-rp">Restaurant</span>
+    </div>
+</div>
+
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content order-page-container">
+    <div class="page-header">
+        <h1>Поръчка за Маса №<span th:text="${order.table.number}"></span></h1>
+    </div>
+
+    <div th:if="${successMessage}" class="form-alert alert-success">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}" class="form-alert alert-danger">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <div class="order-summary-card" id="orderSummaryCard">
+        <h2>Детайли на Поръчката</h2>
+        <div class="order-summary-row">
+            <span>ID на Поръчка:</span>
+            <span th:text="${order.id}"></span>
+        </div>
+        <div class="order-summary-row">
+            <span>Обща Сума:</span>
+            <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')} + ' лв.'"></span>
+        </div>
+        <div class="order-summary-row">
+            <span>Време на Поръчка:</span>
+            <span th:text="${#temporals.format(order.orderTime, 'dd.MM.yyyy HH:mm')}"></span>
+        </div>
+        <div class="order-summary-row">
+            <span>Приблизително Готова до:</span>
+            <span th:text="${order.estimatedReadyTime != null ? #temporals.format(order.estimatedReadyTime, 'dd.MM.yyyy HH:mm') : 'Не е зададено'}"></span>
+        </div>
+        <div class="order-summary-row">
+            <span>Сервитьор:</span>
+        </div>
+    </div>
+
+    <div class="order-items-section" id="orderItemsSection">
+        <h2>Артикули в Поръчката</h2>
+        <th:block th:if="${#lists.isEmpty(order.items)}">
+            <p class="no-items-message">Няма добавени артикули към тази поръчка.</p>
+        </th:block>
+        <div class="order-items-list" th:unless="${#lists.isEmpty(order.items)}">
+            <div class="order-item-card" th:each="item : ${order.items}">
+                <div class="item-info">
+                    <span class="item-quantity" th:text="${item.quantity}"></span> x
+                    <span class="item-name" th:text="${item.name}"></span>
+                    <span class="item-price" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')} + ' лв.'"></span>
+                </div>
+                <div class="item-status" th:classappend="'status-' + ${item.orderItemStatus.name()}" th:text="${item.orderItemStatus.displayName}">Статус</div>
+                <p class="item-instructions" th:if="${item.specialInstructions}" th:text="${item.specialInstructions}"></p>
+                <div class="item-actions">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="fab-btn" id="addOrderItemBtn">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div class="menu-items-selection-container" id="menuItemsSelectionContainer">
+        <div class="menu-selection-header">
+            <h2>Добави Артикули от Менюто</h2>
+            <button class="btn-back-to-order" id="backToOrderBtn">
+                <i class="fas fa-arrow-left"></i> Назад към поръчката
+            </button>
+        </div>
+
+        <div class="filter-controls">
+            <div class="category-filter-buttons">
+                <button type="button" class="category-btn active" data-category="ALL">Всички</button>
+
+                <th:block th:each="cat : ${menuCategoryEnumValues}">
+                    <button type="button" class="category-btn" th:data-category="${cat.name()}" th:text="${cat.name}"></button>
+                </th:block>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="menuItemSearch" placeholder="Търсене по име на артикул..." class="form-control">
+            </div>
+        </div>
+
+
+        <div class="menu-item-grid-dynamic" id="dynamicMenuItemsGrid">
+            <th:block th:if="${#lists.isEmpty(allMenuItems)}">
+                <p id="noMenuItemsMessage" class="no-items-message">
+                    Няма намерени елементи от менюто за показване.
+                </p>
+            </th:block>
+            <th:block th:unless="${#lists.isEmpty(allMenuItems)}">
+                <div class="menu-item-card menu-item-card-dynamic"
+                     th:each="menuItem : ${allMenuItems}"
+                     th:data-category="${menuItem.category}"
+                     th:data-available="${menuItem.available}"
+                     th:data-item-id="${menuItem.id}"
+                     th:data-item-name="${menuItem.name}"
+                     th:data-item-price="${menuItem.price}">
+
+                    <img th:if="${menuItem.image != null}"
+                         th:src="'data:image/jpeg;base64,' + ${menuItem.image}"
+                         th:alt="${menuItem.name}" class="product-image">
+                    <img th:if="${menuItem.image == null}"
+                         th:src="@{/img/photos/noImage.png}" th:alt="${menuItem.name} + ' - Няма изображение'" class="product-image">
+                    <div class="menu-item-content">
+                        <div class="name-availability-row">
+                            <h3 class="menu-item-name" th:text="${menuItem.name}"></h3>
+                            <span class="menu-item-availability" th:classappend="${menuItem.available} ? 'available-status' : 'not-available-status'" th:text="${menuItem.available} ? 'Налично' : 'Неналично'"></span>
+                        </div>
+                        <span class="menu-item-category" th:text="${T(com.example.RestaurantOS_Thymeleaf.enums.MenuCategory).valueOf(menuItem.category).name}"></span>
+                        <p class="menu-item-description" th:text="${menuItem.description != null ? menuItem.description : 'Няма описание.'}"></p>
+                        <div class="menu-item-details">
+                            <span class="menu-item-price" th:text="${#numbers.formatDecimal(menuItem.price, 0, 'COMMA', 2, 'POINT')} + ' лв.'"></span>
+                            <span class="menu-item-prep-time">
+                                <i class="far fa-clock"></i> <span th:text="${menuItem.preparationTime != null ? menuItem.preparationTime : 'N/A'}"></span> мин
+                            </span>
+                        </div>
+                        <div class="menu-item-actions">
+                            <button type="button" class="btn btn-add-to-order" th:data-menu-item-id="${menuItem.id}">
+                                <i class="fas fa-plus"></i> Добави
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="addOrderItemModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 class="modal-title" id="addItemModalTitle">Добави артикул към поръчката</h2>
+            <button class="modal-close-btn" id="closeAddOrderItemModalBtn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="addOrderItemForm">
+                <input type="hidden" id="modalMenuItemId">
+                <p class="modal-menu-item-name"></p>
+                <p class="modal-menu-item-price"></p>
+
+                <div class="form-group">
+                    <label for="itemQuantity" class="form-label">Количество*</label>
+                    <input type="number" id="itemQuantity" name="quantity" class="form-control" value="1" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="specialInstructions" class="form-label">Специални инструкции (по избор)</label>
+                    <textarea id="specialInstructions" name="specialInstructions" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancelAddOrderItemModalBtn">Отказ</button>
+                    <button type="submit" class="btn-primary-action" id="saveOrderItemBtn">Добави в поръчката</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/order.js}"></script>
+<script th:inline="javascript">
+    /* Data from backend for client-side operations */
+    const currentOrderId = [[${orderId}]];
+    // menuCategoryEnumValues is passed for potentially dynamic rendering of filter buttons in JS, or for display name lookups if not using T() in HTML directly.
+    const menuCategoryEnumValues = [[${menuCategoryEnumValues}]]
+
+    // Log for debugging
+    console.log("Current Order ID:", currentOrderId);
+    console.log("Menu Categories for JS:", menuCategoryEnumValues);
+</script>
+
+</body>
+</html>

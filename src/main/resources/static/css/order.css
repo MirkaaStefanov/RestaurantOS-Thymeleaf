@@ -1,0 +1,575 @@
+/* --- Order Page Specific Styles --- */
+
+/* General Container for the Order Page */
+.order-page-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Order Summary Card */
+.order-summary-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.order-summary-card h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.order-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #f0f0f0;
+}
+
+.order-summary-row:last-child {
+    border-bottom: none;
+}
+
+.order-summary-row span:first-child {
+    font-weight: 500;
+    color: #555;
+}
+
+.order-summary-row span:last-child {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Existing Order Items Section */
+.order-items-section {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.order-items-section h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.no-items-message {
+    text-align: center;
+    color: #777;
+    font-style: italic;
+    padding: 20px;
+    width: 100%; /* Ensure it spans full width in grid */
+}
+
+.order-items-list {
+    display: grid;
+    gap: 15px;
+}
+
+.order-item-card {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.order-item-card .item-info {
+    flex-grow: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.order-item-card .item-quantity {
+    font-weight: 700;
+    color: #007bff;
+    font-size: 1.1em;
+}
+
+.order-item-card .item-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.order-item-card .item-price {
+    font-weight: 500;
+    color: #666;
+    margin-left: auto; /* Push price to the right */
+}
+
+.order-item-card .item-status {
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 0.85em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+/* Status colors for OrderItemStatus */
+.order-item-card .status-PENDING {
+    background-color: #fff3cd; /* yellow */
+    color: #856404;
+}
+.order-item-card .status-PREPARING {
+    background-color: #e0f2f7; /* light blue */
+    color: #007bff;
+}
+.order-item-card .status-READY {
+    background-color: #d4edda; /* green */
+    color: #28a745;
+}
+.order-item-card .status-DELIVERED {
+    background-color: #e2e3e5; /* grey */
+    color: #6c757d;
+}
+.order-item-card .status-CANCELLED {
+    background-color: #f8d7da; /* red */
+    color: #dc3545;
+}
+
+.order-item-card .item-instructions {
+    flex-basis: 100%; /* Take full width below info/status */
+    font-style: italic;
+    color: #888;
+    font-size: 0.9em;
+    margin-top: 5px;
+    border-top: 1px dashed #eee;
+    padding-top: 5px;
+}
+
+.order-item-card .item-actions {
+    margin-left: auto;
+}
+
+/* Floating Action Button (FAB) */
+.fab-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    display: flex; /* Ensure it's flex by default for centering icon */
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 9999; /* Increased z-index to ensure visibility */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    /* Crucial: Explicitly ensure it's visible. */
+    display: flex !important; /* Force display flex */
+    visibility: visible !important; /* Force visibility */
+    opacity: 1 !important; /* Force opacity */
+}
+
+.fab-btn:hover {
+    background-color: #0056b3;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* Menu Items Selection Container (dynamic display) */
+.menu-items-selection-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    margin-top: 30px;
+    width: 100%;
+    max-width: 100%; /* Adjust as needed */
+    display: none; /* Hidden by default - controlled by JS */
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out; /* Simple fade-in effect */
+
+    /* NEW: Ensure minimum height to push content down or activate scrollbar */
+    /* You might need to adjust '100px' based on your actual header/footer heights and margins */
+    min-height: calc(100vh - 100px);
+}
+
+.menu-selection-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.menu-selection-header h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #333;
+}
+
+/* Back Button */
+.btn-back-to-order {
+    background-color: #6c757d; /* Grey */
+    color: #fff;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-back-to-order:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* --- Filter Controls Layout --- */
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
+    gap: 15px; /* Space between filter sections */
+    margin-bottom: 20px;
+    align-items: center;
+    width: 100%; /* Take full width of parent */
+}
+
+.category-filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start; /* Default align to start */
+    flex-grow: 1; /* Allow categories to take available space */
+}
+
+.search-bar {
+    flex-grow: 1; /* Allows search bar to take available space */
+    min-width: 200px; /* Minimum width for search bar */
+}
+
+.search-bar .form-control {
+    width: 100%; /* Ensure search input takes full width of its container */
+    padding: 10px 15px;
+    border: 1px solid var(--border-color, #ccc); /* Added fallback for var */
+    border-radius: var(--border-radius, 5px); /* Added fallback for var */
+    font-size: 1rem;
+}
+
+
+/* Category Filter Buttons */
+.category-btn {
+    background-color: #e9ecef;
+    color: #555;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px; /* Pill shape */
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.category-btn:hover {
+    background-color: #dee2e6;
+    color: #333;
+    transform: translateY(-1px);
+}
+
+.category-btn.active {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+.category-btn.active:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+
+
+/* --- Menu Item Grid Layout (Updated & Improved) --- */
+.menu-item-grid-dynamic {
+    display: grid;
+    /* Default: Min 280px, fills available space, typically 3 or 4 columns on large screens */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px; /* Space between cards */
+    padding: 20px;
+    background-color: var(--card-bg-color, #fdfdfd); /* Add a subtle background, fallback if var not found */
+    border-radius: var(--border-radius, 8px); /* Fallback for border-radius */
+    box-shadow: var(--shadow-sm, 0 2px 5px rgba(0,0,0,0.05)); /* Fallback for shadow */
+    width: 100%; /* Ensure grid takes full width of its container */
+}
+
+.menu-item-card-dynamic {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color, #eee);
+    border-radius: var(--border-radius, 8px);
+    overflow: hidden; /* Ensures images don't overflow rounded corners */
+    background-color: var(--bg-color-light, #fff);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.menu-item-card-dynamic:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md, 0 4px 10px rgba(0,0,0,0.1));
+}
+
+.menu-item-card-dynamic .product-image {
+    width: 100%;
+    height: 180px; /* Fixed height for consistent image size */
+    object-fit: cover; /* Ensures image covers the area without distortion */
+    border-bottom: 1px solid var(--border-color, #eee);
+}
+
+.menu-item-card-dynamic .menu-item-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allows content to take up remaining space */
+}
+
+.menu-item-card-dynamic .name-availability-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.menu-item-card-dynamic .menu-item-name {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-color-dark, #333);
+}
+
+.menu-item-card-dynamic .menu-item-availability {
+    font-size: 0.85rem;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+.menu-item-card-dynamic .available-status {
+    background-color: #e6ffe6; /* Light green */
+    color: #008000; /* Dark green */
+}
+
+.menu-item-card-dynamic .not-available-status {
+    background-color: #ffe6e6; /* Light red */
+    color: #cc0000; /* Dark red */
+}
+
+.menu-item-card-dynamic .menu-item-category {
+    font-size: 0.9rem;
+    color: var(--text-color-light, #777);
+    margin-bottom: 8px;
+    display: block; /* Ensures it takes its own line */
+}
+
+.menu-item-card-dynamic .menu-item-description {
+    font-size: 0.95rem;
+    color: var(--text-color-primary, #555);
+    margin-bottom: 15px;
+    flex-grow: 1; /* Allows description to grow if content is longer */
+}
+
+.menu-item-card-dynamic .menu-item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto; /* Pushes details to the bottom */
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color, #eee);
+}
+
+.menu-item-card-dynamic .menu-item-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary-color, #007bff);
+}
+
+.menu-item-card-dynamic .menu-item-prep-time {
+    font-size: 0.9rem;
+    color: var(--text-color-light, #777);
+}
+
+.menu-item-card-dynamic .menu-item-prep-time i {
+    margin-right: 5px;
+}
+
+.menu-item-card-dynamic .menu-item-actions {
+    margin-top: 15px;
+    text-align: right; /* Align button to the right */
+}
+
+.menu-item-card-dynamic .btn-add-to-order {
+    background-color: #28a745; /* Green add button */
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: var(--border-radius, 5px);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600; /* Make text bolder */
+    transition: background-color 0.2s ease;
+    width: 100%; /* Make button take full width of card */
+}
+
+.menu-item-card-dynamic .btn-add-to-order:hover {
+    background-color: #218838;
+}
+
+
+/* Modal for Add Order Item (reusing main.css modal styles) */
+/* Specific adjustments if needed */
+.modal-overlay .modal-menu-item-name {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.modal-overlay .modal-menu-item-price {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #007bff;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) { /* Tablets and smaller laptops */
+    .order-page-container {
+        padding: 15px;
+        margin: 15px auto;
+    }
+    .order-summary-card, .order-items-section, .menu-items-selection-container {
+        padding: 15px;
+    }
+    .order-summary-card h2, .order-items-section h2, .menu-selection-header h2 {
+        font-size: 20px;
+    }
+    .fab-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+        bottom: 20px;
+    }
+    .menu-item-grid-dynamic {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Adjust min for smaller screens */
+        gap: 15px;
+        padding: 15px; /* Adjust padding for grid */
+    }
+    .category-btn {
+        padding: 7px 14px;
+        font-size: 14px;
+    }
+    .btn-back-to-order {
+        padding: 7px 12px;
+        font-size: 14px;
+        gap: 6px;
+    }
+}
+
+/* Phones (most iPhones and Androids in portrait) */
+@media (max-width: 768px) {
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .category-filter-buttons {
+        width: 100%;
+        justify-content: flex-start; /* Align left on small screens */
+        overflow-x: auto; /* Enable horizontal scrolling if many buttons */
+        padding-bottom: 5px; /* Space for scrollbar */
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+        -ms-overflow-style: none;  /* Hide scrollbar for IE and Edge */
+    }
+
+    .category-filter-buttons::-webkit-scrollbar { /* Hide scrollbar for Chrome, Safari, Opera */
+        display: none;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+
+    /* **CRITICAL FIX for 2 items per line on iPhone** */
+    .menu-item-grid-dynamic {
+        grid-template-columns: repeat(2, 1fr); /* Forces 2 items per line */
+        gap: 15px;
+        padding: 10px; /* Smaller padding for mobile */
+    }
+    .menu-item-card-dynamic .product-image {
+        height: 140px; /* Slightly reduced image height for 2-column layout */
+    }
+}
+
+/* Very Small Phones (e.g., iPhone SE 1st gen or smallest Androids) */
+@media (max-width: 400px) { /* Adjusted from 480px to 400px to keep 2 cols longer */
+    .order-page-container {
+        padding: 10px;
+        margin: 10px auto;
+    }
+    .order-summary-card, .order-items-section, .menu-items-selection-container {
+        padding: 10px;
+    }
+    .order-summary-row {
+        flex-direction: column; /* Stack details vertically */
+        align-items: flex-start;
+    }
+    .order-summary-row span:last-child {
+        margin-left: 0;
+        margin-top: 5px;
+    }
+    .menu-selection-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+    .menu-selection-header h2 {
+        font-size: 20px;
+        text-align: center;
+    }
+    /* Only switch to 1 item per line on very small screens now */
+    .menu-item-grid-dynamic {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .menu-item-card-dynamic .product-image {
+        height: 180px; /* Revert to larger image height for single column */
+    }
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

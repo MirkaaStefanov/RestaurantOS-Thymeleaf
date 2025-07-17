@@ -1,5 +1,6 @@
 package com.example.RestaurantOS_Thymeleaf.dtos;
 
+import com.example.RestaurantOS_Thymeleaf.dtos.auth.PublicUserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +17,9 @@ public class OrderDTO {
     public Long id;
     private List<OrderItemDTO> items;
     private double totalAmount;
-    private UUID waiterId;
+    private PublicUserDTO user;
     private LocalDateTime orderTime;
     private LocalDateTime estimatedReadyTime;
-    private UUID table;
+    private TableDTO table;
 
 }
