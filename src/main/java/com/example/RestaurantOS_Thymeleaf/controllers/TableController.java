@@ -2,10 +2,12 @@ package com.example.RestaurantOS_Thymeleaf.controllers;
 
 import com.example.RestaurantOS_Thymeleaf.clients.AuthenticationClient;
 import com.example.RestaurantOS_Thymeleaf.clients.MenuItemClient;
+import com.example.RestaurantOS_Thymeleaf.clients.OrderItemClient;
 import com.example.RestaurantOS_Thymeleaf.clients.TableClient;
 import com.example.RestaurantOS_Thymeleaf.clients.UserClient;
 import com.example.RestaurantOS_Thymeleaf.dtos.MenuItemDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.OrderDTO;
+import com.example.RestaurantOS_Thymeleaf.dtos.OrderItemDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.TableDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.AuthenticationResponse;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.PublicUserDTO;
@@ -42,6 +44,7 @@ public class TableController {
     private final TableClient tableClient;
     private final UserClient userClient;
     private final MenuItemClient menuItemClient;
+    private final OrderItemClient orderItemClient;
 
     @GetMapping
     public String getTables(Model model, HttpServletRequest request) {
@@ -129,20 +132,29 @@ public class TableController {
             log.error("Error in table getting used {}: {}", id, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to toggle availability: " + e.getMessage());
         }
-        return "redirect:/table";
+        return "redirect:/table/order/"+order.getTable().id;
     }
 
     @GetMapping("/order/{id}")
     public String orderForTable(@PathVariable UUID id, HttpServletRequest request, Model model) {
         String token = (String) request.getSession().getAttribute("sessionToken");
         OrderDTO orderDTO = tableClient.getOrderForTable(id, token);
+        List<OrderItemDTO> allOrderItems = orderItemClient.getAllOrderItems(orderDTO.getId(),null, token);
         List<MenuItemDTO> allMenuItems = menuItemClient.getAllMenuItems(true,null, token);
         model.addAttribute("order", orderDTO);
         model.addAttribute("allMenuItems", allMenuItems);
         model.addAttribute("orderId", orderDTO.getId());
         model.addAttribute("menuCategoryEnumValues", MenuCategory.values());
+        model.addAttribute("newOrderItem", new OrderItemDTO());
+        model.addAttribute("orderItems", allOrderItems);
         System.out.println("menu items: "+allMenuItems.size());
         return "table/orders";
+    }
 
+    @PostMapping("/order/add")
+    public String addOrderItem(@ModelAttribute OrderItemDTO orderItemDTO, HttpServletRequest request, Model model){
+        String token = (String) request.getSession().getAttribute("sessionToken");
+        OrderItemDTO saved = orderItemClient.create(orderItemDTO, token);
+        return "redirect:/table/order/"+saved.getOrder().getTable().id;
     }
 }

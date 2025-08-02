@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Поръчка за Маса №<span th:text="${order.table.number}"></span></title>
+    <title>Поръчка за Маса № th:text="${order.table.number}"></title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
 
     <link rel="stylesheet" th:href="@{/css/main.css}">
@@ -62,19 +62,34 @@
 
     <div class="order-items-section" id="orderItemsSection">
         <h2>Артикули в Поръчката</h2>
-        <th:block th:if="${#lists.isEmpty(order.items)}">
+        <th:block th:if="${#lists.isEmpty(orderItems)}">
             <p class="no-items-message">Няма добавени артикули към тази поръчка.</p>
         </th:block>
-        <div class="order-items-list" th:unless="${#lists.isEmpty(order.items)}">
-            <div class="order-item-card" th:each="item : ${order.items}">
+        <div class="order-items-list" th:unless="${#lists.isEmpty(orderItems)}">
+            <div class="order-item-card" th:each="item : ${orderItems}">
                 <div class="item-info">
                     <span class="item-quantity" th:text="${item.quantity}"></span> x
                     <span class="item-name" th:text="${item.name}"></span>
-                    <span class="item-price" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 2, 'POINT')} + ' лв.'"></span>
+                    <span class="item-price" th:text="${#numbers.formatDecimal(item.menuItem.price, 0, 'COMMA', 2, 'POINT')} + ' лв.'"></span>
                 </div>
                 <div class="item-status" th:classappend="'status-' + ${item.orderItemStatus.name()}" th:text="${item.orderItemStatus.displayName}">Статус</div>
                 <p class="item-instructions" th:if="${item.specialInstructions}" th:text="${item.specialInstructions}"></p>
                 <div class="item-actions">
+                    <div th:if="${item.orderItemStatus.name() == 'WAITING'}">
+                        <form th:action="@{/table/order/approve-item}" method="post">
+                            <input type="hidden" name="orderId" th:value="${order.id}">
+                            <input type="hidden" name="orderItemId" th:value="${item.id}">
+                            <button type="submit" class="btn btn-approve">
+                                <i class="fas fa-check"></i> Одобри
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:if="${item.orderItemStatus.name() == 'IN_PROGRESS'}">
+                        <button type="button" class="btn btn-complete">
+                            <i class="fas fa-check-double"></i> Готово
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,10 +174,12 @@
             <button class="modal-close-btn" id="closeAddOrderItemModalBtn"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
-            <form id="addOrderItemForm">
-                <input type="hidden" id="modalMenuItemId">
+            <form id="addOrderItemForm" th:action="@{/table/order/add}" th:object="${newOrderItem}" method="post">
+                <input type="hidden" id="modalMenuItemId" name="menuItemId">
                 <p class="modal-menu-item-name"></p>
                 <p class="modal-menu-item-price"></p>
+
+                <input type="hidden" name="orderId" th:value="${order.id}">
 
                 <div class="form-group">
                     <label for="itemQuantity" class="form-label">Количество*</label>
