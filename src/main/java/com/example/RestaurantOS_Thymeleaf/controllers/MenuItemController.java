@@ -4,6 +4,7 @@ package com.example.RestaurantOS_Thymeleaf.controllers;
 import com.example.RestaurantOS_Thymeleaf.clients.MenuItemClient;
 import com.example.RestaurantOS_Thymeleaf.dtos.MenuItemDTO;
 import com.example.RestaurantOS_Thymeleaf.enums.MenuCategory;
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,13 @@ public class MenuItemController {
             HttpServletRequest request) {
 
         String token = (String) request.getSession().getAttribute("sessionToken");
+        String userRole = (String) request.getSession().getAttribute("sessionRole");
+
+        if (userRole == null || !userRole.equals("ADMIN") ) {
+            return "forward:/error";
+        }
+
+
         List<MenuItemDTO> menuItems = new ArrayList<>();
 
         try {

@@ -50,6 +50,12 @@ public class TableController {
     public String getTables(Model model, HttpServletRequest request) {
 
         String token = (String) request.getSession().getAttribute("sessionToken");
+        String userRole = (String) request.getSession().getAttribute("sessionRole");
+
+        if (userRole == null) {
+            return "forward:/error";
+        }
+
         List<TableDTO> tables = new ArrayList<>();
         PublicUserDTO user = userClient.getMe(token);
 
