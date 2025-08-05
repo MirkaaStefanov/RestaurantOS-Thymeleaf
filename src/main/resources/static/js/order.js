@@ -4,7 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Correctly reference the global variable defined by the inline script ---
     const orderId = currentOrderId;
-
+    // Helper function to get display name from enum values
+    const getStatusDisplayName = (statusName) => {
+        const status = orderItemStatusEnumValues.find(s => s.name === statusName);
+        return status ? status.displayName : statusName;
+    };
     // --- DOM elements ---
     const addOrderItemBtn = document.getElementById('addOrderItemBtn');
     const menuItemsSelectionContainer = document.getElementById('menuItemsSelectionContainer');
@@ -25,6 +29,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let activeCategory = 'ALL';
     let searchQuery = '';
+    let stompClient = null;
+
+    // --- WebSocket Setup ---
+    function connectToWebSocket() {
+        // Use a relative path to connect to the /ws endpoint defined in your config
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, (frame) => {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to the specific order's topic to receive updates
+            stompClient.subscribe(`/topic/orders/${orderId}`, (message) => {
+                const newOrderItem = JSON.parse(message.body);
+                console.log('Received new order item:', newOrderItem);
+                addOrderItemToPage(newOrderItem);
+            });
+        }, (error) => {
+            console.error('WebSocket connection error: ' + error);
+        });
+    }
+
+    // Call the function to connect when the page loads
+    connectToWebSocket();
+
+    // Function to dynamically add a new item's card to the page
+    const addOrderItemToPage = (newOrderItem) => {
+        const orderItemsSection = document.querySelector('.order-items-section');
+        if (!orderItemsSection) {
+            return;
+        }
+
+        const noItemsMessage = orderItemsSection.querySelector('.no-items-message');
+        if (noItemsMessage) {
+            noItemsMessage.remove();
+        }
+
+        let orderItemsList = orderItemsSection.querySelector('.order-items-list');
+
+        if (!orderItemsList) {
+            orderItemsList = document.createElement('div');
+            orderItemsList.classList.add('order-items-list');
+            orderItemsSection.appendChild(orderItemsList);
+        }
+
+        const statusName = typeof newOrderItem.orderItemStatus === 'string'
+            ? newOrderItem.orderItemStatus
+            : newOrderItem.orderItemStatus.name;
+
+        const statusDisplayName = getStatusDisplayName(statusName);
+
+        const newCard = document.createElement('div');
+        newCard.classList.add('order-item-card');
+        newCard.innerHTML = `
+            <div class="item-info">
+                <span class="item-quantity">${newOrderItem.quantity}</span> x
+                <span class="item-name">${newOrderItem.menuItem.name}</span>
+                <span class="item-price">${newOrderItem.menuItem.price.toFixed(2)} лв.</span>
+            </div>
+            <div class="item-status status-${statusName}">${statusDisplayName}</div>
+            ${newOrderItem.specialInstructions ? `<p class="item-instructions">${newOrderItem.specialInstructions}</p>` : ''}
+            <div class="item-actions">
+                <div ${statusName === 'WAITING' ? '' : 'style="display:none;"'}>
+                    <form action="/table/order/approve-item" method="post">
+                        <input type="hidden" name="orderId" value="${newOrderItem.order.id}">
+                        <input type="hidden" name="orderItemId" value="${newOrderItem.id}">
+                        <button type="submit" class="btn btn-approve">
+                            <i class="fas fa-check"></i> Одобри
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+        orderItemsList.appendChild(newCard);
+    };
+
 
     // Function to apply filters by showing/hiding existing elements
     const applyFilters = () => {
@@ -46,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Toggle the "no items message" visibility
         let noItemsMessage = document.getElementById('noMenuItemsMessage');
         if (!anyVisible) {
             if (!noItemsMessage) {
@@ -73,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('orderItemsSection').style.display = 'none';
         menuItemsSelectionContainer.style.display = 'flex';
 
-        // Reset filters on show
         categoryFilterButtonsContainer.querySelector('[data-category="ALL"]').click();
         menuItemSearchInput.value = '';
         searchQuery = '';
@@ -86,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('orderItemsSection').style.display = 'block';
     });
 
-    // Category filter button clicks (delegated)
     categoryFilterButtonsContainer.addEventListener('click', (event) => {
         const target = event.target.closest('.category-btn');
         if (target && target.dataset.category) {
@@ -99,13 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Search input listener
     menuItemSearchInput.addEventListener('input', (event) => {
         searchQuery = event.target.value;
         applyFilters();
     });
 
-    // Modal logic
     closeAddOrderItemModalBtn.addEventListener('click', () => {
         addOrderItemModal.classList.remove('active');
     });
@@ -114,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         addOrderItemModal.classList.remove('active');
     });
 
-    // Event listener for "Добави" buttons (delegated)
     dynamicMenuItemsGrid.addEventListener('click', (event) => {
         const addButton = event.target.closest('.btn-add-to-order');
         if (addButton) {
@@ -134,9 +208,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // The form submission is now a standard POST, so we don't need a custom event listener
-    // that uses 'fetch' and 'preventDefault'. The browser will handle the submission.
-    // The Thymeleaf `th:action` and `th:object` will ensure the data is sent correctly.
+    // --- NEW: Standard HTTP POST form submission handler (AJAX) ---
+    addOrderItemForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Stop the default form submission (prevents page reload)
+
+        const formData = new FormData(addOrderItemForm);
+
+        try {
+            const response = await fetch(addOrderItemForm.action, {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Неуспешна заявка за добавяне на артикул: ${errorText}`);
+            }
+
+            addOrderItemModal.classList.remove('active');
+            addOrderItemForm.reset();
+
+        } catch (error) {
+            console.error("Error adding order item:", error);
+            alert('Възникна грешка: ' + error.message);
+        }
+    });
 
     // On page load, hide the menu selection container
     menuItemsSelectionContainer.style.display = 'none';

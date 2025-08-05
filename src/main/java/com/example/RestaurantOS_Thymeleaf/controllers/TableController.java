@@ -12,12 +12,18 @@ import com.example.RestaurantOS_Thymeleaf.dtos.TableDTO;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.AuthenticationResponse;
 import com.example.RestaurantOS_Thymeleaf.dtos.auth.PublicUserDTO;
 import com.example.RestaurantOS_Thymeleaf.enums.MenuCategory;
+import com.example.RestaurantOS_Thymeleaf.enums.OrderItemStatus;
 import com.example.RestaurantOS_Thymeleaf.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.server.Session;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,6 +51,8 @@ public class TableController {
     private final UserClient userClient;
     private final MenuItemClient menuItemClient;
     private final OrderItemClient orderItemClient;
+    private final SimpMessagingTemplate messagingTemplate;
+
 
     @GetMapping
     public String getTables(Model model, HttpServletRequest request) {
@@ -151,6 +159,7 @@ public class TableController {
         model.addAttribute("allMenuItems", allMenuItems);
         model.addAttribute("orderId", orderDTO.getId());
         model.addAttribute("menuCategoryEnumValues", MenuCategory.values());
+        model.addAttribute("orderItemStatusEnumValues", OrderItemStatus.values());
         model.addAttribute("newOrderItem", new OrderItemDTO());
         model.addAttribute("orderItems", allOrderItems);
         System.out.println("menu items: "+allMenuItems.size());
@@ -158,9 +167,15 @@ public class TableController {
     }
 
     @PostMapping("/order/add")
-    public String addOrderItem(@ModelAttribute OrderItemDTO orderItemDTO, HttpServletRequest request, Model model){
+    @ResponseBody // This tells Spring to return the object as JSON, not a view name.
+    public ResponseEntity<Void> addOrderItem(@ModelAttribute OrderItemDTO orderItemDTO, HttpServletRequest request) {
         String token = (String) request.getSession().getAttribute("sessionToken");
+
         OrderItemDTO saved = orderItemClient.create(orderItemDTO, token);
-        return "redirect:/table/order/"+saved.getOrder().getTable().id;
+
+        messagingTemplate.convertAndSend("/topic/orders/" + saved.getOrder().getId(), saved);
+
+        // Return a successful HTTP status code to the client.
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

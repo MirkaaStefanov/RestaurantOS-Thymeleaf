@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Поръчка за Маса № th:text="${order.table.number}"></title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/menu-item.css}">
     <link rel="stylesheet" th:href="@{/css/table.css}">
@@ -207,12 +208,13 @@
 <script th:inline="javascript">
     /* Data from backend for client-side operations */
     const currentOrderId = [[${orderId}]];
-    // menuCategoryEnumValues is passed for potentially dynamic rendering of filter buttons in JS, or for display name lookups if not using T() in HTML directly.
-    const menuCategoryEnumValues = [[${menuCategoryEnumValues}]]
+    const menuCategoryEnumValues = [[${menuCategoryEnumValues}]];
+    const orderItemStatusEnumValues = [[${orderItemStatusEnumValues}]];
 
     // Log for debugging
     console.log("Current Order ID:", currentOrderId);
     console.log("Menu Categories for JS:", menuCategoryEnumValues);
+    console.log("Order Item Statuses for JS:", orderItemStatusEnumValues);
 </script>
 
 </body>
