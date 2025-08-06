@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const orderId = currentOrderId;
     const getStatusDisplayName = (statusName) => {
+        // Find the status object by its name and return its displayName
         const status = orderItemStatusEnumValues.find(s => s.name === statusName);
         return status ? status.displayName : statusName;
     };
@@ -49,13 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (existingCard) {
                     updateOrderItemOnPage(existingCard, updatedItem);
                 } else {
-                    const statusName = typeof updatedItem.orderItemStatus === 'string'
-                        ? updatedItem.orderItemStatus
-                        : updatedItem.orderItemStatus.name;
-                    addOrderItemToPage(updatedItem, statusName);
+                    addOrderItemToPage(updatedItem);
                 }
-
-                // Re-apply the filter to ensure the new/updated item is shown/hidden correctly
                 applyStatusFilter();
             });
         }, (error) => {
@@ -65,16 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     connectToWebSocket();
 
-    // --- New function to filter items by status ---
     const applyStatusFilter = () => {
         const items = orderItemsList.querySelectorAll('.order-item-card');
-        const noItemsMessage = document.getElementById('noItemsMessage');
+        const noItemsMessage = document.querySelector('.order-items-section .no-items-message');
         let anyVisible = false;
 
         items.forEach(card => {
             const status = card.dataset.status;
-            const isWaiting = status === 'WAITING';
-            const isOthers = status !== 'WAITING';
+            const isWaiting = status === 'WAITING' || status === 'PENDING';
+            const isOthers = status !== 'WAITING' && status !== 'PENDING';
 
             if (activeStatusFilter === 'all' || (activeStatusFilter === 'waiting' && isWaiting) || (activeStatusFilter === 'others' && isOthers)) {
                 card.style.display = '';
@@ -94,62 +89,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Refactored add item function ---
-    const addOrderItemToPage = (newOrderItem, statusName) => {
-        const noItemsMessage = document.querySelector('.order-items-section .no-items-message');
+    const addOrderItemToPage = (newOrderItem) => {
+        // This line correctly finds and removes the 'no items' message if it exists.
+        const noItemsMessage = orderItemsList.querySelector('.no-items-message');
         if (noItemsMessage) {
             noItemsMessage.remove();
         }
 
+        const statusName = newOrderItem.orderItemStatus;
         const statusDisplayName = getStatusDisplayName(statusName);
 
         const newCard = document.createElement('div');
         newCard.classList.add('order-item-card');
         newCard.dataset.itemId = newOrderItem.id;
-        newCard.dataset.status = statusName; // Set the status data attribute
+        newCard.dataset.status = statusName;
         newCard.innerHTML = `
             <div class="item-info">
                 <span class="item-quantity">${newOrderItem.quantity}</span> x
-                <span class="item-name">${newOrderItem.menuItem.name}</span>
+                <span class="item-name">${newOrderItem.name}</span>
                 <span class="item-price">${newOrderItem.menuItem.price.toFixed(2)} лв.</span>
             </div>
             <div class="item-status status-${statusName}">${statusDisplayName}</div>
             ${newOrderItem.specialInstructions ? `<p class="item-instructions">${newOrderItem.specialInstructions}</p>` : ''}
             <div class="item-actions">
-                ${statusName === 'WAITING' ? `<button type="button" class="btn btn-approve" data-order-item-id="${newOrderItem.id}"><i class="fas fa-check"></i> Одобри</button>` : ''}
-                ${statusName === 'IN_PROGRESS' ? `<button type="button" class="btn btn-complete"><i class="fas fa-check-double"></i> Готово</button>` : ''}
+                ${statusName === 'WAITING' || statusName === 'PENDING' ? `<button type="button" class="btn btn-approve" data-order-item-id="${newOrderItem.id}"><i class="fas fa-check"></i> Одобри</button>` : ''}
+                ${statusName === 'PREPARING' ? `<button type="button" class="btn btn-complete" data-order-item-id="${newOrderItem.id}"><i class="fas fa-check-double"></i> Готово</button>` : ''}
             </div>
         `;
         orderItemsList.appendChild(newCard);
     };
 
-    // --- Refactored update item function ---
     const updateOrderItemOnPage = (itemCard, updatedItem) => {
-        const statusName = typeof updatedItem.orderItemStatus === 'string'
-            ? updatedItem.orderItemStatus
-            : updatedItem.orderItemStatus.name;
+        const statusName = updatedItem.orderItemStatus;
         const statusDisplayName = getStatusDisplayName(statusName);
 
-        // Update the card's data-status attribute
         itemCard.dataset.status = statusName;
 
-        // Update the status and class
         const statusDiv = itemCard.querySelector('.item-status');
-        statusDiv.textContent = statusDisplayName;
-        statusDiv.className = `item-status status-${statusName}`;
+        if (statusDiv) {
+            statusDiv.textContent = statusDisplayName;
+            statusDiv.className = `item-status status-${statusName}`;
+        }
 
-        // Update the actions div
         const actionsDiv = itemCard.querySelector('.item-actions');
-        actionsDiv.innerHTML = '';
-        if (statusName === 'IN_PROGRESS') {
-            actionsDiv.innerHTML = `
-                <button type="button" class="btn btn-complete">
-                    <i class="fas fa-check-double"></i> Готово
-                </button>
-            `;
+        if (actionsDiv) {
+            actionsDiv.innerHTML = '';
+            if (statusName === 'WAITING' || statusName === 'PENDING') {
+                 actionsDiv.innerHTML = `
+                    <button type="button" class="btn btn-approve" data-order-item-id="${updatedItem.id}">
+                        <i class="fas fa-check"></i> Одобри
+                    </button>
+                `;
+            } else if (statusName === 'PREPARING') {
+                actionsDiv.innerHTML = `
+                    <button type="button" class="btn btn-complete" data-order-item-id="${updatedItem.id}">
+                        <i class="fas fa-check-double"></i> Готово
+                    </button>
+                `;
+            }
         }
     };
-
 
     const applyFilters = () => {
         const menuCards = dynamicMenuItemsGrid.querySelectorAll('.menu-item-card-dynamic');
@@ -190,12 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Event Listeners ---
-
     addOrderItemBtn.addEventListener('click', () => {
         document.getElementById('orderSummaryCard').style.display = 'none';
         document.getElementById('orderItemsSection').style.display = 'none';
         menuItemsSelectionContainer.style.display = 'flex';
-
         categoryFilterButtonsContainer.querySelector('[data-category="ALL"]').click();
         menuItemSearchInput.value = '';
         searchQuery = '';
@@ -208,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('orderItemsSection').style.display = 'block';
     });
 
-    // NEW: Filter button click handler
     filterButtonsContainer.addEventListener('click', (event) => {
         const target = event.target.closest('.btn-filter');
         if (target) {
@@ -269,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
 
         const formData = new FormData(addOrderItemForm);
-
         try {
             const response = await fetch(addOrderItemForm.action, {
                 method: 'POST',
@@ -283,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorText = await response.text();
                 throw new Error(`Неуспешна заявка за добавяне на артикул: ${errorText}`);
             }
-
             addOrderItemModal.classList.remove('active');
             addOrderItemForm.reset();
 
@@ -309,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errorText = await response.text();
                     throw new Error(`Failed to accept order item: ${errorText}`);
                 }
-
                 console.log(`Order item ${orderItemId} accepted.`);
 
             } catch (error) {
