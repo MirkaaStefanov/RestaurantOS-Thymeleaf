@@ -37,7 +37,7 @@ public interface OrderItemClient {
     void delete(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String auth);
 
     @PostMapping("/accept/{id}")
-    void accept(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String auth);
+    OrderItemDTO accept(@PathVariable Long id, @RequestHeader(value = "Authorization", required = false) String auth);
 
 
 }

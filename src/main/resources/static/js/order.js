@@ -2,13 +2,12 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Correctly reference the global variable defined by the inline script ---
     const orderId = currentOrderId;
-    // Helper function to get display name from enum values
     const getStatusDisplayName = (statusName) => {
         const status = orderItemStatusEnumValues.find(s => s.name === statusName);
         return status ? status.displayName : statusName;
     };
+
     // --- DOM elements ---
     const addOrderItemBtn = document.getElementById('addOrderItemBtn');
     const menuItemsSelectionContainer = document.getElementById('menuItemsSelectionContainer');
@@ -27,61 +26,87 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemQuantityInput = document.getElementById('itemQuantity');
     const specialInstructionsInput = document.getElementById('specialInstructions');
 
+    const orderItemsList = document.getElementById('orderItemsList');
+    const filterButtonsContainer = document.querySelector('.filter-buttons-container');
+
     let activeCategory = 'ALL';
     let searchQuery = '';
-    let stompClient = null;
+    let activeStatusFilter = 'all';
 
     // --- WebSocket Setup ---
     function connectToWebSocket() {
-        // Use a relative path to connect to the /ws endpoint defined in your config
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, (frame) => {
             console.log('Connected: ' + frame);
 
-            // Subscribe to the specific order's topic to receive updates
             stompClient.subscribe(`/topic/orders/${orderId}`, (message) => {
-                const newOrderItem = JSON.parse(message.body);
-                console.log('Received new order item:', newOrderItem);
-                addOrderItemToPage(newOrderItem);
+                const updatedItem = JSON.parse(message.body);
+                console.log('Received updated order item:', updatedItem);
+
+                const existingCard = document.querySelector(`.order-item-card[data-item-id="${updatedItem.id}"]`);
+                if (existingCard) {
+                    updateOrderItemOnPage(existingCard, updatedItem);
+                } else {
+                    const statusName = typeof updatedItem.orderItemStatus === 'string'
+                        ? updatedItem.orderItemStatus
+                        : updatedItem.orderItemStatus.name;
+                    addOrderItemToPage(updatedItem, statusName);
+                }
+
+                // Re-apply the filter to ensure the new/updated item is shown/hidden correctly
+                applyStatusFilter();
             });
         }, (error) => {
             console.error('WebSocket connection error: ' + error);
         });
     }
 
-    // Call the function to connect when the page loads
     connectToWebSocket();
 
-    // Function to dynamically add a new item's card to the page
-    const addOrderItemToPage = (newOrderItem) => {
-        const orderItemsSection = document.querySelector('.order-items-section');
-        if (!orderItemsSection) {
-            return;
-        }
+    // --- New function to filter items by status ---
+    const applyStatusFilter = () => {
+        const items = orderItemsList.querySelectorAll('.order-item-card');
+        const noItemsMessage = document.getElementById('noItemsMessage');
+        let anyVisible = false;
 
-        const noItemsMessage = orderItemsSection.querySelector('.no-items-message');
+        items.forEach(card => {
+            const status = card.dataset.status;
+            const isWaiting = status === 'WAITING';
+            const isOthers = status !== 'WAITING';
+
+            if (activeStatusFilter === 'all' || (activeStatusFilter === 'waiting' && isWaiting) || (activeStatusFilter === 'others' && isOthers)) {
+                card.style.display = '';
+                anyVisible = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (noItemsMessage) {
+            if (anyVisible) {
+                noItemsMessage.style.display = 'none';
+            } else {
+                noItemsMessage.style.display = 'block';
+                noItemsMessage.textContent = 'Няма намерени артикули с този филтър.';
+            }
+        }
+    };
+
+    // --- Refactored add item function ---
+    const addOrderItemToPage = (newOrderItem, statusName) => {
+        const noItemsMessage = document.querySelector('.order-items-section .no-items-message');
         if (noItemsMessage) {
             noItemsMessage.remove();
         }
-
-        let orderItemsList = orderItemsSection.querySelector('.order-items-list');
-
-        if (!orderItemsList) {
-            orderItemsList = document.createElement('div');
-            orderItemsList.classList.add('order-items-list');
-            orderItemsSection.appendChild(orderItemsList);
-        }
-
-        const statusName = typeof newOrderItem.orderItemStatus === 'string'
-            ? newOrderItem.orderItemStatus
-            : newOrderItem.orderItemStatus.name;
 
         const statusDisplayName = getStatusDisplayName(statusName);
 
         const newCard = document.createElement('div');
         newCard.classList.add('order-item-card');
+        newCard.dataset.itemId = newOrderItem.id;
+        newCard.dataset.status = statusName; // Set the status data attribute
         newCard.innerHTML = `
             <div class="item-info">
                 <span class="item-quantity">${newOrderItem.quantity}</span> x
@@ -91,22 +116,41 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="item-status status-${statusName}">${statusDisplayName}</div>
             ${newOrderItem.specialInstructions ? `<p class="item-instructions">${newOrderItem.specialInstructions}</p>` : ''}
             <div class="item-actions">
-                <div ${statusName === 'WAITING' ? '' : 'style="display:none;"'}>
-                    <form action="/table/order/approve-item" method="post">
-                        <input type="hidden" name="orderId" value="${newOrderItem.order.id}">
-                        <input type="hidden" name="orderItemId" value="${newOrderItem.id}">
-                        <button type="submit" class="btn btn-approve">
-                            <i class="fas fa-check"></i> Одобри
-                        </button>
-                    </form>
-                </div>
+                ${statusName === 'WAITING' ? `<button type="button" class="btn btn-approve" data-order-item-id="${newOrderItem.id}"><i class="fas fa-check"></i> Одобри</button>` : ''}
+                ${statusName === 'IN_PROGRESS' ? `<button type="button" class="btn btn-complete"><i class="fas fa-check-double"></i> Готово</button>` : ''}
             </div>
         `;
         orderItemsList.appendChild(newCard);
     };
 
+    // --- Refactored update item function ---
+    const updateOrderItemOnPage = (itemCard, updatedItem) => {
+        const statusName = typeof updatedItem.orderItemStatus === 'string'
+            ? updatedItem.orderItemStatus
+            : updatedItem.orderItemStatus.name;
+        const statusDisplayName = getStatusDisplayName(statusName);
 
-    // Function to apply filters by showing/hiding existing elements
+        // Update the card's data-status attribute
+        itemCard.dataset.status = statusName;
+
+        // Update the status and class
+        const statusDiv = itemCard.querySelector('.item-status');
+        statusDiv.textContent = statusDisplayName;
+        statusDiv.className = `item-status status-${statusName}`;
+
+        // Update the actions div
+        const actionsDiv = itemCard.querySelector('.item-actions');
+        actionsDiv.innerHTML = '';
+        if (statusName === 'IN_PROGRESS') {
+            actionsDiv.innerHTML = `
+                <button type="button" class="btn btn-complete">
+                    <i class="fas fa-check-double"></i> Готово
+                </button>
+            `;
+        }
+    };
+
+
     const applyFilters = () => {
         const menuCards = dynamicMenuItemsGrid.querySelectorAll('.menu-item-card-dynamic');
         let anyVisible = false;
@@ -164,6 +208,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('orderItemsSection').style.display = 'block';
     });
 
+    // NEW: Filter button click handler
+    filterButtonsContainer.addEventListener('click', (event) => {
+        const target = event.target.closest('.btn-filter');
+        if (target) {
+            filterButtonsContainer.querySelectorAll('.btn-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            target.classList.add('active');
+            activeStatusFilter = target.dataset.filter;
+            applyStatusFilter();
+        }
+    });
+
     categoryFilterButtonsContainer.addEventListener('click', (event) => {
         const target = event.target.closest('.category-btn');
         if (target && target.dataset.category) {
@@ -208,9 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- NEW: Standard HTTP POST form submission handler (AJAX) ---
     addOrderItemForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Stop the default form submission (prevents page reload)
+        event.preventDefault();
 
         const formData = new FormData(addOrderItemForm);
 
@@ -237,6 +293,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // On page load, hide the menu selection container
+    document.addEventListener('click', async (event) => {
+        const approveButton = event.target.closest('.btn-approve');
+        if (approveButton) {
+            const orderItemId = approveButton.dataset.orderItemId;
+            try {
+                const response = await fetch(`/table/order/accept/${orderItemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to accept order item: ${errorText}`);
+                }
+
+                console.log(`Order item ${orderItemId} accepted.`);
+
+            } catch (error) {
+                console.error('Error accepting order item:', error);
+                alert('An error occurred while accepting the order item.');
+            }
+        }
+    });
+
     menuItemsSelectionContainer.style.display = 'none';
 });

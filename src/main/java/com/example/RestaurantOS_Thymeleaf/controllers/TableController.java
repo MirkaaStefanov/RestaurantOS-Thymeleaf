@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -174,8 +175,21 @@ public class TableController {
         OrderItemDTO saved = orderItemClient.create(orderItemDTO, token);
 
         messagingTemplate.convertAndSend("/topic/orders/" + saved.getOrder().getId(), saved);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-        // Return a successful HTTP status code to the client.
+    @PostMapping("/order/accept/{id}")
+    @ResponseBody
+    public ResponseEntity<Void> acceptOrderItem(@PathVariable Long id, HttpServletRequest request){
+        String token = (String) request.getSession().getAttribute("sessionToken");
+
+        OrderItemDTO accepted = orderItemClient.accept(id, token);
+
+        if (accepted != null && accepted.getOrder() != null) {
+            messagingTemplate.convertAndSend("/topic/orders/" + accepted.getOrder().getId(), accepted);
+        }
+
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

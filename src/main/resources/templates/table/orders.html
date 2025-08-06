@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Поръчка за Маса № th:text="${order.table.number}"></title>
+    <title>Поръчка за Маса №<span th:text="${order.table.number}"></span></title>
     <link rel="icon" type="image/x-icon" th:href="@{/img/photos/noImage.png}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
@@ -63,11 +63,18 @@
 
     <div class="order-items-section" id="orderItemsSection">
         <h2>Артикули в Поръчката</h2>
+
+        <div class="filter-buttons-container">
+            <button class="btn btn-filter active" data-filter="all">Всички</button>
+            <button class="btn btn-filter" data-filter="waiting">Чакащи</button>
+            <button class="btn btn-filter" data-filter="others">Други</button>
+        </div>
+
         <th:block th:if="${#lists.isEmpty(orderItems)}">
             <p class="no-items-message">Няма добавени артикули към тази поръчка.</p>
         </th:block>
-        <div class="order-items-list" th:unless="${#lists.isEmpty(orderItems)}">
-            <div class="order-item-card" th:each="item : ${orderItems}">
+        <div class="order-items-list" id="orderItemsList" th:unless="${#lists.isEmpty(orderItems)}">
+            <div class="order-item-card" th:each="item : ${orderItems}" th:data-item-id="${item.id}" th:data-status="${item.orderItemStatus.name()}">
                 <div class="item-info">
                     <span class="item-quantity" th:text="${item.quantity}"></span> x
                     <span class="item-name" th:text="${item.name}"></span>
@@ -77,15 +84,10 @@
                 <p class="item-instructions" th:if="${item.specialInstructions}" th:text="${item.specialInstructions}"></p>
                 <div class="item-actions">
                     <div th:if="${item.orderItemStatus.name() == 'WAITING'}">
-                        <form th:action="@{/table/order/approve-item}" method="post">
-                            <input type="hidden" name="orderId" th:value="${order.id}">
-                            <input type="hidden" name="orderItemId" th:value="${item.id}">
-                            <button type="submit" class="btn btn-approve">
-                                <i class="fas fa-check"></i> Одобри
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-approve" th:data-order-item-id="${item.id}">
+                            <i class="fas fa-check"></i> Одобри
+                        </button>
                     </div>
-
                     <div th:if="${item.orderItemStatus.name() == 'IN_PROGRESS'}">
                         <button type="button" class="btn btn-complete">
                             <i class="fas fa-check-double"></i> Готово
@@ -111,7 +113,6 @@
         <div class="filter-controls">
             <div class="category-filter-buttons">
                 <button type="button" class="category-btn active" data-category="ALL">Всички</button>
-
                 <th:block th:each="cat : ${menuCategoryEnumValues}">
                     <button type="button" class="category-btn" th:data-category="${cat.name()}" th:text="${cat.name}"></button>
                 </th:block>
@@ -120,7 +121,6 @@
                 <input type="text" id="menuItemSearch" placeholder="Търсене по име на артикул..." class="form-control">
             </div>
         </div>
-
 
         <div class="menu-item-grid-dynamic" id="dynamicMenuItemsGrid">
             <th:block th:if="${#lists.isEmpty(allMenuItems)}">
@@ -206,15 +206,8 @@
 <script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/order.js}"></script>
 <script th:inline="javascript">
-    /* Data from backend for client-side operations */
     const currentOrderId = [[${orderId}]];
-    const menuCategoryEnumValues = [[${menuCategoryEnumValues}]];
     const orderItemStatusEnumValues = [[${orderItemStatusEnumValues}]];
-
-    // Log for debugging
-    console.log("Current Order ID:", currentOrderId);
-    console.log("Menu Categories for JS:", menuCategoryEnumValues);
-    console.log("Order Item Statuses for JS:", orderItemStatusEnumValues);
 </script>
 
 </body>
