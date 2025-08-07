@@ -30,9 +30,9 @@ public class OrderItemController {
         String token = (String) request.getSession().getAttribute("sessionToken");
         String userRole = (String) request.getSession().getAttribute("sessionRole");
 
-//        if (userRole == null || !userRole.equals(Role.COOKER)) {
-//            return "forward:/error";
-//        }
+        if (userRole == null || !userRole.equals("COOKER")) {
+            return "forward:/error";
+        }
 
         List<OrderItemDTO> orderItems = orderItemClient.getAllOrderItems(null, OrderItemStatus.PREPARING, token);
 
