@@ -35,59 +35,65 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeStatusFilter = 'all';
 
     // --- WebSocket Setup ---
-    function connectToWebSocket() {
-        const socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
+     function connectToWebSocket() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
 
-        stompClient.connect({}, (frame) => {
-            console.log('Connected: ' + frame);
+            stompClient.connect({}, (frame) => {
+                console.log('Connected: ' + frame);
 
-            stompClient.subscribe(`/topic/orders/${orderId}`, (message) => {
-                const updatedItem = JSON.parse(message.body);
-                console.log('Received updated order item:', updatedItem);
+                stompClient.subscribe(`/topic/orders/${orderId}`, (message) => {
+                    const updatedItem = JSON.parse(message.body);
+                    console.log('Received updated order item:', updatedItem);
 
-                const existingCard = document.querySelector(`.order-item-card[data-item-id="${updatedItem.id}"]`);
-                if (existingCard) {
-                    updateOrderItemOnPage(existingCard, updatedItem);
-                } else {
-                    addOrderItemToPage(updatedItem);
-                }
-                applyStatusFilter();
+                    const existingCard = document.querySelector(`.order-item-card[data-item-id="${updatedItem.id}"]`);
+                    if (existingCard) {
+                        updateOrderItemOnPage(existingCard, updatedItem);
+                    } else {
+                        const statusName = typeof updatedItem.orderItemStatus === 'string'
+                            ? updatedItem.orderItemStatus
+                            : updatedItem.orderItemStatus.name;
+                        addOrderItemToPage(updatedItem, statusName);
+                    }
+
+                    // Re-apply the filter to ensure the new/updated item is shown/hidden correctly
+                    applyStatusFilter();
+                });
+            }, (error) => {
+                console.error('WebSocket connection error: ' + error);
             });
-        }, (error) => {
-            console.error('WebSocket connection error: ' + error);
-        });
-    }
+        }
 
     connectToWebSocket();
 
     const applyStatusFilter = () => {
-        const items = orderItemsList.querySelectorAll('.order-item-card');
-        const noItemsMessage = document.querySelector('.order-items-section .no-items-message');
-        let anyVisible = false;
+            const items = orderItemsList.querySelectorAll('.order-item-card');
+            const noItemsMessage = document.getElementById('noItemsMessage');
+            let anyVisible = false;
 
-        items.forEach(card => {
-            const status = card.dataset.status;
-            const isWaiting = status === 'WAITING' || status === 'PENDING';
-            const isOthers = status !== 'WAITING' && status !== 'PENDING';
+            items.forEach(card => {
+                const status = card.dataset.status;
+                const isWaiting = status === 'WAITING';
+                const isOthers = status !== 'WAITING';
 
-            if (activeStatusFilter === 'all' || (activeStatusFilter === 'waiting' && isWaiting) || (activeStatusFilter === 'others' && isOthers)) {
-                card.style.display = '';
-                anyVisible = true;
-            } else {
-                card.style.display = 'none';
+                if (activeStatusFilter === 'all' || (activeStatusFilter === 'waiting' && isWaiting) || (activeStatusFilter === 'others' && isOthers)) {
+                    card.style.display = '';
+                    anyVisible = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (noItemsMessage) {
+                if (anyVisible) {
+                    noItemsMessage.style.display = 'none';
+                } else {
+                    noItemsMessage.style.display = 'block';
+                    noItemsMessage.textContent = 'Няма намерени артикули с този филтър.';
+                }
             }
-        });
+        };
 
-        if (noItemsMessage) {
-            if (anyVisible) {
-                noItemsMessage.style.display = 'none';
-            } else {
-                noItemsMessage.style.display = 'block';
-                noItemsMessage.textContent = 'Няма намерени артикули с този филтър.';
-            }
-        }
-    };
 
     const addOrderItemToPage = (newOrderItem) => {
         // This line correctly finds and removes the 'no items' message if it exists.
@@ -119,36 +125,32 @@ document.addEventListener('DOMContentLoaded', () => {
         orderItemsList.appendChild(newCard);
     };
 
-    const updateOrderItemOnPage = (itemCard, updatedItem) => {
-        const statusName = updatedItem.orderItemStatus;
-        const statusDisplayName = getStatusDisplayName(statusName);
+   const updateOrderItemOnPage = (itemCard, updatedItem) => {
+           const statusName = typeof updatedItem.orderItemStatus === 'string'
+               ? updatedItem.orderItemStatus
+               : updatedItem.orderItemStatus.displayName;
+           const statusDisplayName = getStatusDisplayName(statusName);
 
-        itemCard.dataset.status = statusName;
+           // Update the card's data-status attribute
+           itemCard.dataset.status = statusName;
 
-        const statusDiv = itemCard.querySelector('.item-status');
-        if (statusDiv) {
-            statusDiv.textContent = statusDisplayName;
-            statusDiv.className = `item-status status-${statusName}`;
-        }
+           // Update the status and class
+           const statusDiv = itemCard.querySelector('.item-status');
+           statusDiv.textContent = statusDisplayName;
+           statusDiv.className = `item-status status-${statusName}`;
 
-        const actionsDiv = itemCard.querySelector('.item-actions');
-        if (actionsDiv) {
-            actionsDiv.innerHTML = '';
-            if (statusName === 'WAITING' || statusName === 'PENDING') {
-                 actionsDiv.innerHTML = `
-                    <button type="button" class="btn btn-approve" data-order-item-id="${updatedItem.id}">
-                        <i class="fas fa-check"></i> Одобри
-                    </button>
-                `;
-            } else if (statusName === 'PREPARING') {
-                actionsDiv.innerHTML = `
-                    <button type="button" class="btn btn-complete" data-order-item-id="${updatedItem.id}">
-                        <i class="fas fa-check-double"></i> Готово
-                    </button>
-                `;
-            }
-        }
-    };
+           // Update the actions div
+           const actionsDiv = itemCard.querySelector('.item-actions');
+           actionsDiv.innerHTML = '';
+           if (statusName === 'IN_PROGRESS') {
+               actionsDiv.innerHTML = `
+                   <button type="button" class="btn btn-complete">
+                       <i class="fas fa-check-double"></i> Готово
+                   </button>
+               `;
+           }
+       };
+
 
     const applyFilters = () => {
         const menuCards = dynamicMenuItemsGrid.querySelectorAll('.menu-item-card-dynamic');
@@ -287,30 +289,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.addEventListener('click', async (event) => {
-        const approveButton = event.target.closest('.btn-approve');
-        if (approveButton) {
-            const orderItemId = approveButton.dataset.orderItemId;
-            try {
-                const response = await fetch(`/table/order/accept/${orderItemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+   document.addEventListener('click', async (event) => {
+           const approveButton = event.target.closest('.btn-approve');
+           if (approveButton) {
+               const orderItemId = approveButton.dataset.orderItemId;
+               try {
+                   const response = await fetch(`/table/order/accept/${orderItemId}`, {
+                       method: 'POST',
+                       headers: {
+                           'Content-Type': 'application/json'
+                       }
+                   });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Failed to accept order item: ${errorText}`);
-                }
-                console.log(`Order item ${orderItemId} accepted.`);
+                   if (!response.ok) {
+                       const errorText = await response.text();
+                       throw new Error(`Failed to accept order item: ${errorText}`);
+                   }
 
-            } catch (error) {
-                console.error('Error accepting order item:', error);
-                alert('An error occurred while accepting the order item.');
-            }
-        }
-    });
+                   console.log(`Order item ${orderItemId} accepted.`);
+
+               } catch (error) {
+                   console.error('Error accepting order item:', error);
+                   alert('An error occurred while accepting the order item.');
+               }
+           }
+       });
 
     menuItemsSelectionContainer.style.display = 'none';
 });

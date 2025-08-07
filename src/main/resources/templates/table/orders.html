@@ -204,8 +204,8 @@
 <script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/order.js}"></script>
 <script th:inline="javascript">
-    const currentOrderId = [[${order.id}]];
-    const orderItemStatusEnumValues = [[${T(com.example.RestaurantOS_Thymeleaf.enums.OrderItemStatus).values()}]];
+    const currentOrderId = [[${orderId}]];
+    const orderItemStatusEnumValues = [[${orderItemStatusEnumValues}]];
 </script>
 
 </body>
