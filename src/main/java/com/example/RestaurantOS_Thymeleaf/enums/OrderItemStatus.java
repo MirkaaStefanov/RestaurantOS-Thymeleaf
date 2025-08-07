@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 public enum OrderItemStatus {
 
     WAITING("За одобрение"),
-    PENDING("Изчаква"),
     PREPARING("Приготвя се"),
     DONE("Готово");
 

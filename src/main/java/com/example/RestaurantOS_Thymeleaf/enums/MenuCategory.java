@@ -12,5 +12,5 @@ public enum MenuCategory {
     BEVERAGE("Напитки"),
     SIDE("Други");
 
-    private final String name;
+    private final String displayName;
 }

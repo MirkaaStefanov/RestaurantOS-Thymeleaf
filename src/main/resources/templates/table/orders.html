@@ -112,7 +112,7 @@
             <div class="category-filter-buttons">
                 <button type="button" class="category-btn active" data-category="ALL">Всички</button>
                 <th:block th:each="cat : ${menuCategoryEnumValues}">
-                    <button type="button" class="category-btn" th:data-category="${cat.name()}" th:text="${cat.name}"></button>
+                    <button type="button" class="category-btn" th:data-category="${cat.name()}" th:text="${cat.displayName}"></button>
                 </th:block>
             </div>
             <div class="search-bar">
