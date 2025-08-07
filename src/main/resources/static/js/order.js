@@ -102,7 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
             noItemsMessage.remove();
         }
 
-        const statusName = newOrderItem.orderItemStatus;
+        const statusName = typeof newOrderItem.orderItemStatus === 'string'
+            ? newOrderItem.orderItemStatus
+            : newOrderItem.orderItemStatus.name;
         const statusDisplayName = getStatusDisplayName(statusName);
 
         const newCard = document.createElement('div');
@@ -126,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
    const updateOrderItemOnPage = (itemCard, updatedItem) => {
-           const statusName = typeof updatedItem.orderItemStatus === 'string'
-               ? updatedItem.orderItemStatus
-               : updatedItem.orderItemStatus.displayName;
-           const statusDisplayName = getStatusDisplayName(statusName);
+          const statusName = typeof updatedItem.orderItemStatus === 'string'
+              ? updatedItem.orderItemStatus
+              : updatedItem.orderItemStatus.name;
+          const statusDisplayName = getStatusDisplayName(statusName);
 
            // Update the card's data-status attribute
            itemCard.dataset.status = statusName;
@@ -150,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
                `;
            }
        };
+
+       console.log('Enum values loaded:', orderItemStatusEnumValues);
 
 
     const applyFilters = () => {

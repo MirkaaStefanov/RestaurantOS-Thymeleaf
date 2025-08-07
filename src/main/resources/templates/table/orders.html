@@ -201,12 +201,20 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+<<script th:inline="javascript">
+    const currentOrderId = [[${orderId}]];
+    const orderItemStatusEnumValues = [
+        <th:block th:each="status, stat : ${orderItemStatusEnumValues}">
+            {
+                name: [[${status.name()}]],
+                displayName: [[${status.displayName}]]
+            }<th:block th:if="${!stat.last}">,</th:block>
+        </th:block>
+    ];
+</script>
+
 <script th:src="@{/js/main.js}"></script>
 <script th:src="@{/js/order.js}"></script>
-<script th:inline="javascript">
-    const currentOrderId = [[${orderId}]];
-    const orderItemStatusEnumValues = [[${orderItemStatusEnumValues}]];
-</script>
 
 </body>
 </html>
