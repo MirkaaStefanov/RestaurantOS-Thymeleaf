@@ -1,5 +1,3 @@
-// order.js
-
 document.addEventListener('DOMContentLoaded', () => {
 
     const orderId = currentOrderId;
@@ -10,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const menuItemsSelectionContainer = document.getElementById('menuItemsSelectionContainer');
     const orderView = document.getElementById('orderView');
+    const menuBtn = document.getElementById('menuBtn');
     const orderBtn = document.getElementById('orderBtn');
     const payBtn = document.getElementById('payBtn');
 
@@ -32,8 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchQuery = '';
     let activeStatusFilter = 'all';
 
-    const showView = (viewToShow) => {
-        const allViews = [menuItemsSelectionContainer, orderView];
+    const allViews = [menuItemsSelectionContainer, orderView];
+    const allFooterBtns = [menuBtn, orderBtn, payBtn];
+
+    // Function to handle view switching and button activation
+    const showView = (viewToShow, buttonToActivate) => {
         allViews.forEach(view => {
             view.classList.remove('active-view');
             view.classList.add('hidden-view');
@@ -41,8 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         viewToShow.classList.remove('hidden-view');
         viewToShow.classList.add('active-view');
 
-        const allFooterBtns = [orderBtn, payBtn];
         allFooterBtns.forEach(btn => btn.classList.remove('active'));
+        if (buttonToActivate) {
+            buttonToActivate.classList.add('active');
+        }
     };
 
     function connectToWebSocket() {
@@ -73,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const applyStatusFilter = () => {
         const items = orderItemsList.querySelectorAll('.order-item-card');
-        const noItemsMessage = document.getElementById('noItemsMessage');
+        const noItemsMessage = orderItemsList.querySelector('.no-items-message');
         let anyVisible = false;
 
         items.forEach(card => {
@@ -184,14 +188,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Event listeners for the three footer buttons
+    menuBtn.addEventListener('click', () => {
+        showView(menuItemsSelectionContainer, menuBtn);
+    });
+
     orderBtn.addEventListener('click', () => {
-        showView(orderView);
-        orderBtn.classList.add('active');
+        showView(orderView, orderBtn);
         applyStatusFilter();
     });
 
     payBtn.addEventListener('click', () => {
-        payBtn.classList.add('active');
+        showView(menuItemsSelectionContainer, payBtn);
+        // You would typically handle payment logic here
+        console.log("Pay button clicked. Implement payment logic.");
     });
 
     filterButtonsContainer.addEventListener('click', (event) => {
@@ -231,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addOrderItemModal.classList.remove('active');
     });
 
+    // Event delegation for the "add to order" button
     dynamicMenuItemsGrid.addEventListener('click', (event) => {
         const addButton = event.target.closest('.btn-add-to-order');
         if (addButton) {

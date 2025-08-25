@@ -287,10 +287,10 @@
     color: #fff;
 }
 
-/* --- Menu Item Card Styling --- */
+/* --- Menu Item Card Styling (Updated to look like "Happy") --- */
 .menu-item-card-dynamic {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* Stacks items vertically */
     align-items: center;
     border: 1px solid var(--border-color, #eee);
     border-radius: var(--border-radius, 8px);
@@ -298,6 +298,7 @@
     background-color: var(--bg-color-light, #fff);
     box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    height: 350px; /* Fixed height for consistent cards */
 }
 
 .menu-item-card-dynamic:hover {
@@ -307,7 +308,7 @@
 
 .menu-item-card-dynamic .product-image {
     width: 100%;
-    height: 140px;
+    height: 140px; /* Adjust height for the top image */
     object-fit: cover;
     border-bottom: 1px solid var(--border-color, #eee);
 }
@@ -319,6 +320,7 @@
     align-items: center;
     flex-grow: 1;
     width: 100%;
+    justify-content: space-between; /* Space out content vertically */
 }
 
 .menu-item-card-dynamic .menu-item-name {
@@ -335,7 +337,8 @@
 
 .menu-item-card-dynamic .menu-item-details {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* Stack details vertically */
+    justify-content: center;
     align-items: center;
     width: 100%;
     margin-top: 5px;
@@ -351,6 +354,7 @@
 .menu-item-card-dynamic .menu-item-prep-time {
     font-size: 0.9rem;
     color: var(--text-color-light, #777);
+    margin-top: 5px;
 }
 
 .menu-item-card-dynamic .menu-item-prep-time i {
@@ -358,8 +362,8 @@
 }
 
 .menu-item-card-dynamic .menu-item-actions {
-    margin-top: 0;
-    text-align: right;
+    margin-top: auto; /* Pushes the button to the bottom */
+    text-align: center;
     width: 100%;
     padding: 10px;
     border-top: 1px solid #eee;
@@ -456,6 +460,63 @@
     display: block !important;
 }
 
+/* New CSS for Order View Overlay */
+.order-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f8f8f8;
+    z-index: 999;
+    overflow-y: auto;
+    padding-bottom: 70px;
+    display: none;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.order-view.active-view {
+    display: block;
+}
+
+.order-view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.order-view-header h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.order-view-header .btn-close-order-view {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.2s ease;
+}
+
+.order-view-header .btn-close-order-view:hover {
+    color: #333;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+
 /* Responsive Adjustments */
 @media (min-width: 769px) {
     .order-page-container {
@@ -473,7 +534,7 @@
 
 @media (max-width: 768px) {
     .order-page-container {
-        padding: 10px;
+        padding: 0; /* Remove padding to make the cards touch the sides */
     }
     .filter-controls {
         flex-direction: column;
