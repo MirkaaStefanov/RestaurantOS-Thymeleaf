@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,5 +23,5 @@ public class OrderItemDTO {
     private OrderItemStatus orderItemStatus;
     private OrderDTO order;
     private Long orderId;
-
+    private LocalDateTime addedTime;
 }

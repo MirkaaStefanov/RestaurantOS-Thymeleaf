@@ -13,13 +13,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/orderItem")
 public class OrderItemController {
 
     private final OrderItemClient orderItemClient;
@@ -40,11 +40,12 @@ public class OrderItemController {
                 .filter(item -> item.getMenuItem() != null && item.getMenuItem().getCategory() != MenuCategory.BEVERAGE)
                 .collect(Collectors.toList());
 
-        // You can now use 'filteredOrderItems' in your model
+        filteredOrderItems.sort(Comparator.comparing(OrderItemDTO::getAddedTime));
+
         model.addAttribute("orderItems", filteredOrderItems);
         model.addAttribute("orderItemStatusEnumValues", OrderItemStatus.values());
         model.addAttribute("menuCategoryEnumValues", MenuCategory.values());
-        return "kitchen_orders_view";
+        return "kitchen/kitchen";
 
     }
 }

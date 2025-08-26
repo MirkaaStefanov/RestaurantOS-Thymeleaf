@@ -112,11 +112,11 @@
 }
 
 .table-card .menu-item-actions { /* Buttons at the bottom of table card */
-    justify-content: center; /* Center buttons horizontally */
     margin-top: auto;
     border-top: none;
     padding-top: 0;
     display: flex; /* Ensure flex for centering */
+    justify-content: center; /* Center buttons horizontally */
     gap: 8px; /* Consistent gap between buttons */
 }
 
@@ -170,5 +170,20 @@
     }
     .table-card .menu-item-name {
         font-size: 48px; /* Revert to large size for single column on mobile */
+    }
+}
+
+#dynamicMenuItemsGrid {
+    grid-area: t;
+    display: grid;
+    /* The key change: a smaller minimum width for tables on mobile */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+@media (min-width: 769px) {
+    #dynamicMenuItemsGrid {
+        /* Larger card sizes for desktops */
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
 }

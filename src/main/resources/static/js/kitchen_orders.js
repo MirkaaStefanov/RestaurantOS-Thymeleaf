@@ -2,64 +2,57 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    let stompClient = null;
+
     const getStatusDisplayName = (statusName) => {
         if (!statusName) {
             console.error('getStatusDisplayName called with null or undefined statusName');
             return 'N/A';
         }
         const normalizedStatusName = statusName.toUpperCase().trim();
-        const status = orderItemStatusEnumValues.find(s => s.name.toUpperCase() === normalizedStatusName);
+        const status = orderItemStatusEnumValues.find(s => s && s.name && s.name.toUpperCase().trim() === normalizedStatusName);
         return status ? status.displayName : statusName;
     };
 
-    // Helper function to check if an item is a beverage
     const isBeverage = (item) => {
-        // We need to be careful if the MenuItemDTO object is fully present or just the ID
-        // The WebSocket message should contain the full MenuItemDTO object
         if (item.menuItem && item.menuItem.category) {
             return item.menuItem.category.toUpperCase().trim() === 'BEVERAGE';
         }
         return false;
     };
 
-    // --- DOM Elements ---
     const kitchenOrderItemsList = document.getElementById('kitchenOrderItemsList');
     const noKitchenItemsMessage = document.getElementById('noKitchenItemsMessage');
 
-    // --- WebSocket Setup ---
     function connectToWebSocket() {
         const socket = new SockJS('/ws');
-        const stompClient = Stomp.over(socket);
+        stompClient = Stomp.over(socket);
 
         stompClient.connect({}, (frame) => {
             console.log('Connected to WebSocket for Kitchen View: ' + frame);
 
-            uniqueOrderIds.forEach(orderId => {
-                stompClient.subscribe(`/topic/orders/${orderId}`, (message) => {
-                    const updatedItem = JSON.parse(message.body);
-                    console.log('Received updated order item for kitchen:', updatedItem);
+            // Subscribe to a single, general topic for all new kitchen updates
+            stompClient.subscribe("/topic/kitchen/updates", (message) => {
+                const updatedItem = JSON.parse(message.body);
+                console.log('Received general kitchen update:', updatedItem);
 
-                    if (updatedItem.orderItemStatus && typeof updatedItem.orderItemStatus !== 'string') {
-                        updatedItem.orderItemStatus = updatedItem.orderItemStatus.name;
-                    }
+                if (updatedItem.orderItemStatus && typeof updatedItem.orderItemStatus !== 'string') {
+                    updatedItem.orderItemStatus = updatedItem.orderItemStatus.name;
+                }
 
-                    handleOrderItemUpdate(updatedItem);
-                });
+                handleOrderItemUpdate(updatedItem);
             });
 
         }, (error) => {
             console.error('WebSocket connection error for Kitchen View: ' + error);
         });
     }
+
     connectToWebSocket();
 
-    // --- Core Functions for Dynamic Updates ---
-
     const handleOrderItemUpdate = (updatedItem) => {
-        // New: Exit early if the item is a beverage
         if (isBeverage(updatedItem)) {
             console.log(`Ignoring beverage item with ID: ${updatedItem.id}`);
-            // If the beverage somehow made it onto the page, this will remove it
             const existingCard = document.querySelector(`.order-item-card[data-item-id="${updatedItem.id}"]`);
             if (existingCard) {
                 existingCard.remove();
@@ -75,7 +68,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (existingCard) {
                 updateOrderItemOnPage(existingCard, updatedItem);
             } else {
-                addOrderItemToPage(updatedItem);
+                const newCard = addOrderItemToPage(updatedItem);
+                let inserted = false;
+                const existingCards = kitchenOrderItemsList.querySelectorAll('.order-item-card');
+
+                for (let i = 0; i < existingCards.length; i++) {
+                    const existingItemTime = existingCards[i].dataset.addedTime;
+                    if (new Date(updatedItem.addedTime) < new Date(existingItemTime)) {
+                        kitchenOrderItemsList.insertBefore(newCard, existingCards[i]);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted) {
+                    kitchenOrderItemsList.appendChild(newCard);
+                }
             }
         } else if (targetStatus === 'DONE' || targetStatus === 'CANCELLED') {
             if (existingCard) {
@@ -104,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newCard.dataset.itemId = newOrderItem.id;
         newCard.dataset.status = statusName;
         newCard.dataset.orderId = newOrderItem.order.id;
+        newCard.dataset.addedTime = newOrderItem.addedTime;
 
         newCard.innerHTML = `
             <div class="item-info">
@@ -120,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </button>
             </div>
         `;
-        kitchenOrderItemsList.appendChild(newCard);
+        return newCard;
     };
 
     const updateOrderItemOnPage = (itemCard, updatedItem) => {
@@ -154,12 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (visibleItems.length === 0) {
             if (noKitchenItemsMessage) {
                 noKitchenItemsMessage.style.display = 'block';
-            } else {
-                const p = document.createElement('p');
-                p.id = 'noKitchenItemsMessage';
-                p.classList.add('no-items-message');
-                p.textContent = 'Няма поръчки за приготвяне в момента.';
-                kitchenOrderItemsList.appendChild(p);
             }
         } else {
             if (noKitchenItemsMessage) {
@@ -168,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Event Listener for "Готово" button ---
     document.addEventListener('click', async (event) => {
         const completeButton = event.target.closest('.btn-complete');
         if (completeButton) {
@@ -192,5 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Initial check for no items message
     updateNoItemsMessage();
 });

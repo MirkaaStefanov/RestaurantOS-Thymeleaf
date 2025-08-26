@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кухня - Поръчки за Приготвяне</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/menu-item.css}">
+    <link rel="stylesheet" th:href="@{/css/order.css}">
+    <link rel="stylesheet" th:href="@{/css/kitchen_orders.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="mobile-header">
+    <button class="hamburger-menu" id="hamburgerBtn">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="mobile-header-logo">
+        <span class="logo-hm">OS</span><span class="logo-rp">Restaurant</span>
+    </div>
+</div>
+
+<div th:replace="~{fragments/sidebar :: main-sidebar}"></div>
+
+<div class="main-content order-page-container">
+    <div class="page-header">
+        <h1>Поръчки за Приготвяне</h1>
+    </div>
+
+    <div class="order-items-section" id="kitchenOrderItemsSection">
+        <h2>Артикули за Приготвяне</h2>
+
+        <div class="order-items-list" id="kitchenOrderItemsList">
+            <p class="no-items-message" id="noKitchenItemsMessage" th:style="${#lists.isEmpty(orderItems) ? 'display: block;' : 'display: none;'}">
+                Няма поръчки за приготвяне в момента.
+            </p>
+            <div class="order-item-card" th:each="item : ${orderItems}"
+                 th:data-item-id="${item.id}"
+                 th:data-status="${item.orderItemStatus.name()}"
+                 th:data-order-id="${item.order.id}"
+                 th:data-added-time="${item.addedTime}">
+                <div class="item-info">
+                    <span class="item-quantity" th:text="${item.quantity}"></span> x
+                    <span class="item-name" th:text="${item.menuItem.name}"></span>
+                    <span class="item-price"
+                          th:text="${#numbers.formatDecimal(item.menuItem.price, 0, 'COMMA', 2, 'POINT')} + ' лв.'"></span>
+                </div>
+                <div class="item-order-id">Поръчка №<span th:text="${item.order.id}"></span></div>
+                <div class="item-status" th:classappend="'status-' + ${item.orderItemStatus.name()}"
+                     th:text="${item.orderItemStatus.displayName}">Статус
+                </div>
+                <p class="item-instructions" th:if="${item.specialInstructions}"
+                   th:text="${item.specialInstructions}"></p>
+                <div class="item-actions">
+                    <div th:if="${item.orderItemStatus.name() == 'PREPARING'}">
+                        <button type="button" class="btn btn-complete" th:data-order-item-id="${item.id}">
+                            <i class="fas fa-check-double"></i> Готово
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<script th:inline="javascript">
+    const orderItemStatusEnumValues = [[${orderItemStatusEnumValues}]];
+    const menuCategoryEnumValues = [[${menuCategoryEnumValues}]];
+    const initialOrderItems = [[${orderItems}]];
+</script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/kitchen_orders.js}"></script>
+
+</body>
+</html>

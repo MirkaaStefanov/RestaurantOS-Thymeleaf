@@ -187,6 +187,7 @@ public class TableController {
 
         if (accepted != null && accepted.getOrder() != null) {
             messagingTemplate.convertAndSend("/topic/orders/" + accepted.getOrder().getId(), accepted);
+            messagingTemplate.convertAndSend("/topic/kitchen/updates", accepted);
         }
 
 
